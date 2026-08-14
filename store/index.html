@@ -2,170 +2,336 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>Jerry's Crap Shack™</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Jerry's Crap Shack™</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,sans-serif}
+:root{
+  --red:#a40008;
+  --darkred:#6f0006;
+  --slot:#c81720;
+}
 *{box-sizing:border-box}
-#locked{display:none;position:fixed;inset:0;background:#000;align-items:center;justify-content:center}
-#locked img{max-width:96vw;max-height:96vh;object-fit:contain}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;background:#000;
+  font-family:Arial,Helvetica,sans-serif;
+}
+button{font:inherit}
+
+/* LOCKED / JERK STORE */
+#locked{
+  display:none;position:fixed;inset:0;background:#000;
+  align-items:center;justify-content:center;
+}
+#locked img{
+  width:auto;height:min(84vh,650px);max-width:90vw;object-fit:contain;
+  animation:lockedIn .45s ease-out both;
+}
+#lockedBack{
+  position:fixed;left:calc(50% - min(42vh,325px));bottom:4.8vh;
+  color:#03f;text-decoration:underline;font:16px "Times New Roman",serif;
+  cursor:pointer;
+}
+@keyframes lockedIn{
+  from{opacity:0;transform:scale(.985)}
+  to{opacity:1;transform:scale(1)}
+}
+
+/* SHOP */
 #shop{display:none;position:fixed;inset:0;background:#000}
 #stage{
   position:absolute;
   left:50%;top:50%;
-  width:min(100vw,calc(100vh * 1.6551724138));
-  aspect-ratio:960/580;
+  width:min(100vw,calc(100vh * 2.0242915));
+  aspect-ratio:1000/494;
   transform:translate(-50%,-50%);
-  background:url("assets/store_clip_reference.webp") center/100% 100% no-repeat;
   overflow:hidden;
+  background:url("assets/StoreBackground.webp") center/100% 100% no-repeat;
 }
 
-/* Click regions measured directly from the supplied YouTube clip frame. */
-.slot{
+/*
+  Everything below is built from the supplied original assets.
+  No screenshot from the YouTube clip is used as the visual.
+*/
+#panel{
   position:absolute;
+  left:.65%; top:7.2%;
+  width:62.1%; height:55.6%;
+  background:linear-gradient(#930009,#790006);
+  border:5px solid #4a0004;
+  box-shadow:0 4px 8px #0009;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:4.1% 4.8%;
+  padding:3.7% 3.5%;
+  animation:panelEnter .65s cubic-bezier(.16,.8,.26,1) both;
+}
+@keyframes panelEnter{
+  0%{opacity:0;transform:translateX(-5%) scale(.97)}
+  100%{opacity:1;transform:none}
+}
+.slot{
+  position:relative;
+  min-width:0;min-height:0;
+  background:#c8141d;
+  border-radius:8px;
+  box-shadow:
+      inset 0 0 0 2px #d12b31,
+      inset 0 -8px 12px #7d0008aa,
+      0 2px 2px #390003;
+  display:flex;align-items:center;justify-content:center;
   cursor:pointer;
-  border-radius:5.5%;
-  border:0 solid transparent;
-  transition:box-shadow .12s,filter .12s,transform .12s;
+  transition:filter .12s ease,transform .12s ease,box-shadow .12s ease;
+  overflow:visible;
+}
+.slot img{
+  display:block;
+  max-width:72%;max-height:78%;
+  object-fit:contain;
+  filter:drop-shadow(2px 4px 2px #0008);
+  transform-origin:center bottom;
+  pointer-events:none;
 }
 .slot:hover{
-  box-shadow:0 0 24px 8px rgba(255,235,235,.62) inset,0 0 15px rgba(255,255,255,.45);
-  filter:brightness(1.09);
-  transform:scale(1.01);
+  filter:brightness(1.17);
+  box-shadow:
+      inset 0 0 28px 13px rgba(255,100,100,.38),
+      inset 0 0 0 2px #ff4c52,
+      0 0 10px #ff8a8a;
+  transform:scale(1.025);
+  z-index:5;
 }
-.slot.sold::after{
-  content:"SOLD OUT!";
+.slot:hover img{animation:itemHover .47s ease-in-out infinite alternate}
+@keyframes itemHover{
+  from{transform:translateY(0) rotate(-1.3deg) scale(1)}
+  to{transform:translateY(-4%) rotate(1.3deg) scale(1.055)}
+}
+.slot.clicking img{animation:itemBuy .58s cubic-bezier(.18,.81,.2,1) both}
+@keyframes itemBuy{
+  0%{transform:scale(1) rotate(0)}
+  30%{transform:translateY(-18%) scale(1.22) rotate(-7deg)}
+  70%{transform:translateY(8%) scale(.82) rotate(4deg)}
+  100%{transform:scale(0);opacity:0}
+}
+.soldstamp{
+  display:none;
   position:absolute;
-  inset:25% 3%;
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;
-  background:#b50000e8;
-  border:4px solid #fff;
-  font:900 clamp(12px,2.4vw,32px) Impact,Arial,sans-serif;
-  letter-spacing:1px;
-  transform:rotate(-11deg);
-  text-shadow:2px 2px #500;
+  left:7%;right:7%;top:28%;
+  padding:3% 1%;
+  background:#fff;
+  color:#d40000;
+  border:3px solid #d40000;
+  font:900 clamp(14px,2.7vw,37px) Impact,Arial,sans-serif;
+  text-align:center;letter-spacing:.5px;
+  transform:rotate(-9deg) scale(0);
+  box-shadow:2px 3px 3px #0007;
+  z-index:10;
 }
-.slot .tip{
-  position:absolute;left:50%;bottom:-29px;transform:translateX(-50%);
-  color:#fff;background:#111d;border:1px solid #aaa;padding:4px 7px;
-  font:11px Arial;white-space:nowrap;display:none;z-index:20;
+.slot.sold .soldstamp{display:block;animation:stamp .34s cubic-bezier(.16,.95,.42,1.35) forwards}
+.slot.sold img{opacity:.28;filter:grayscale(.25)}
+@keyframes stamp{
+  0%{transform:rotate(-9deg) scale(2.4);opacity:0}
+  100%{transform:rotate(-9deg) scale(1);opacity:1}
 }
-.slot:hover .tip{display:block}
 
-#s0{left:5.45%;top:14.2%;width:16.95%;height:22.4%}
-#s1{left:25.0%;top:14.2%;width:16.75%;height:22.4%}
-#s2{left:44.65%;top:14.2%;width:16.9%;height:22.4%}
-#s3{left:5.45%;top:41.0%;width:16.95%;height:22.3%}
-#s4{left:25.0%;top:41.0%;width:16.75%;height:22.3%}
-#s5{left:44.65%;top:41.0%;width:16.9%;height:22.3%}
+/* Jerry is separate and alive, like the clip */
+#jerryWrap{
+  position:absolute;
+  left:66.0%;top:15.3%;
+  width:23.5%;height:63%;
+  pointer-events:none;
+  animation:jerryEnter .72s .15s cubic-bezier(.16,.85,.27,1) both;
+}
+#jerry{
+  position:absolute;
+  left:13%;top:0;
+  width:70%;height:auto;
+  transform-origin:50% 93%;
+  filter:drop-shadow(2px 5px 3px #0008);
+  animation:jerryIdle 2.45s ease-in-out infinite;
+}
+@keyframes jerryEnter{
+  0%{opacity:0;transform:translateX(18%)}
+  100%{opacity:1;transform:none}
+}
+@keyframes jerryIdle{
+  0%,100%{transform:translateY(0) rotate(-.3deg)}
+  35%{transform:translateY(-1.4%) rotate(.5deg)}
+  65%{transform:translateY(.5%) rotate(-.1deg)}
+}
+
+/* subtle head/body life on mouse proximity */
+#jerry.look{animation:jerryLook .32s ease-out}
+@keyframes jerryLook{
+  0%{transform:rotate(0) scale(1)}
+  50%{transform:rotate(-2deg) scale(1.035)}
+  100%{transform:rotate(0) scale(1)}
+}
+
+/* Real cardboard sign supplied in the asset ZIP */
+#sign{
+  position:absolute;
+  left:58.7%;top:68.0%;
+  width:29.2%;height:auto;
+  transform-origin:center;
+  filter:drop-shadow(2px 4px 2px #0008);
+  animation:signIdle 3s ease-in-out infinite;
+}
+@keyframes signIdle{
+  0%,100%{transform:rotate(-1.2deg) translateY(0)}
+  50%{transform:rotate(.7deg) translateY(-2.2%)}
+}
 
 #notice{
-  display:none;position:absolute;right:2%;bottom:2%;
-  background:#111e;color:#fff;border:1px solid #aaa;
-  padding:8px 12px;font:12px Consolas;z-index:30
+  display:none;position:absolute;right:1%;bottom:1%;
+  padding:7px 10px;background:#111e;color:#fff;border:1px solid #aaa;
+  font:12px Consolas,monospace;z-index:30;
 }
-#dev{
-  display:none;position:absolute;left:8px;bottom:8px;z-index:40;
-  gap:5px
+#help{
+  position:absolute;right:1%;top:1%;color:#fff9;
+  font:10px Consolas,monospace;opacity:0;
+  transition:opacity .2s;
 }
-#dev button{font:11px Arial;padding:5px 7px}
+#stage:hover #help{opacity:.6}
+
+/* Optional debug/admin controls are hidden unless ?admin=1 */
+#admin{
+  display:none;position:absolute;right:1%;bottom:8%;z-index:50;
+  background:#000c;padding:5px;border:1px solid #555
+}
+#admin button{font-size:10px;margin:2px}
 </style>
 </head>
 <body>
+
 <div id="locked">
   <img src="assets/THE'RE_RUNNING_OUT_OF_YOU!.webp" alt="The Jerk Store Called">
+  <a id="lockedBack" onclick="history.back()">&gt; back</a>
 </div>
 
 <div id="shop">
- <div id="stage">
-   <div class="slot" id="s0" data-key="dog"><span class="tip">Dog</span></div>
-   <div class="slot" id="s1" data-key="camera"><span class="tip">JVC Camera</span></div>
-   <div class="slot" id="s2" data-key="charleyyy"><span class="tip">Charleyyy and Friends</span></div>
-   <div class="slot" id="s3" data-key="borat"><span class="tip">Borat Jeffy Card Pack</span></div>
-   <div class="slot" id="s4" data-key="piano"><span class="tip">Jerry's Crap Piano</span></div>
-   <div class="slot" id="s5" data-key="marvin"><span class="tip">Marvin Doll</span></div>
-   <div id="notice"></div><div id="ver" style="display:none;position:absolute;right:8px;top:8px;background:#000c;color:#0f0;font:11px Consolas;padding:4px;z-index:99">V5 CLIP MATCH</div>
-   <div id="dev">
+  <div id="stage">
+    <div id="panel">
+      <div class="slot" data-key="dog" data-name="Dog">
+        <img src="assets/Dog.webp"><div class="soldstamp">SOLD OUT!</div>
+      </div>
+      <div class="slot" data-key="camera" data-name="JVC Camera">
+        <img src="assets/File_11.webp"><div class="soldstamp">SOLD OUT!</div>
+      </div>
+      <div class="slot" data-key="charleyyy" data-name="Charleyyy and Friends">
+        <img src="assets/Cvgart.webp"><div class="soldstamp">SOLD OUT!</div>
+      </div>
+      <div class="slot" data-key="borat" data-name="Borat Jeffy Card Pack">
+        <img src="assets/Boratpack.webp"><div class="soldstamp">SOLD OUT!</div>
+      </div>
+      <div class="slot" data-key="piano" data-name="Jerry's Crap Piano">
+        <img src="assets/Piano.webp"><div class="soldstamp">SOLD OUT!</div>
+      </div>
+      <div class="slot" data-key="marvin" data-name="Marvin Doll">
+        <img src="assets/Marvindoll04.webp"><div class="soldstamp">SOLD OUT!</div>
+      </div>
+    </div>
+
+    <div id="jerryWrap">
+      <img id="jerry" src="assets/Jolly_Ol'_Jerry.webp" alt="Jerry">
+    </div>
+    <img id="sign" src="assets/Jerrys_Crap_Shack.webp" alt="Jerry's Crap Shack">
+
+    <div id="notice"></div>
+    <div id="help">interactive remake • hover/click the merchandise</div>
+    <div id="admin">
+      <button onclick="resetPurchases()">reset purchases</button>
       <button onclick="toggleEnding()">toggle ending</button>
-      <button onclick="resetStore()">reset purchases</button>
-   </div>
- </div>
+    </div>
+  </div>
 </div>
 
-<audio id="music" src="assets/SMLWiki.com - jeffymart (Store Jerry's Crap-Shack).mp3" loop></audio>
+<audio id="music" src="assets/SMLWiki.com - jeffymart (Store Jerry's Crap-Shack).mp3" loop preload="auto"></audio>
 
 <script>
+const qs=new URLSearchParams(location.search);
 const endingKeys=["endingA","endingB","endingab","EndingA","EndingB"];
-const unlocked=endingKeys.some(k=>localStorage.getItem(k)==="true") ||
-               new URLSearchParams(location.search).get("unlocked")==="1";
+const unlocked = qs.get("unlocked")==="1" ||
+                 endingKeys.some(k=>localStorage.getItem(k)==="true");
 
-document.getElementById("locked").style.display=unlocked?"none":"flex";
-document.getElementById("shop").style.display=unlocked?"block":"none";
+locked.style.display=unlocked?"none":"flex";
+shop.style.display=unlocked?"block":"none";
 
-if(new URLSearchParams(location.search).get("admin")==="1"){ document.getElementById("ver").style.display="block";
-  document.getElementById("dev").style.display="flex";
+if(qs.get("admin")==="1") admin.style.display="block";
+
+const music=document.getElementById("music");
+let musicStarted=false;
+function startMusic(){
+  if(!unlocked || musicStarted)return;
+  musicStarted=true;
+  music.volume=.55;
+  music.play().catch(()=>{musicStarted=false});
 }
+document.addEventListener("pointerdown",startMusic,{passive:true});
+document.addEventListener("keydown",startMusic);
 
-const itemNames={
-  dog:"Dog",
-  camera:"JVC Camera",
-  charleyyy:"Charleyyy and Friends: The Video Game",
-  borat:"Borat Jeffy Card Pack",
-  piano:"Jerry's Crap Piano",
-  marvin:"Marvin Doll"
-};
+/* Restore prior purchases */
+document.querySelectorAll(".slot").forEach(slot=>{
+  const k=slot.dataset.key;
+  if(localStorage.getItem("store_"+k)==="sold")slot.classList.add("sold");
 
-document.querySelectorAll(".slot").forEach(el=>{
-  const key=el.dataset.key;
-  if(localStorage.getItem("store_"+key)==="sold") el.classList.add("sold");
-  el.addEventListener("click",()=>buy(el,key));
+  slot.addEventListener("mouseenter",()=>{
+    jerry.classList.remove("look");
+    void jerry.offsetWidth;
+    jerry.classList.add("look");
+  });
+
+  slot.addEventListener("click",()=>{
+    startMusic();
+    if(slot.classList.contains("sold")){
+      toast(slot.dataset.name+" is sold out.");
+      return;
+    }
+
+    slot.classList.add("clicking");
+
+    setTimeout(()=>{
+      slot.classList.remove("clicking");
+      slot.classList.add("sold");
+      localStorage.setItem("store_"+k,"sold");
+
+      // State hooks for the old ARG recreation
+      if(k==="marvin")localStorage.setItem("marvinDoll","true");
+      if(k==="piano")localStorage.setItem("crapPiano","true");
+      if(k==="camera")localStorage.setItem("camera","true");
+
+      toast(slot.dataset.name+" purchased");
+    },520);
+  });
 });
 
-function buy(el,key){
-  if(el.classList.contains("sold")) return;
-  localStorage.setItem("store_"+key,"sold");
-  el.classList.add("sold");
+/* Cursor subtly influences Jerry so the page feels alive */
+stage.addEventListener("pointermove",e=>{
+  const r=stage.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width-.5;
+  const y=(e.clientY-r.top)/r.height-.5;
+  jerry.style.marginLeft=(x*3.5)+"%";
+  jerry.style.marginTop=(y*1.2)+"%";
+});
+stage.addEventListener("pointerleave",()=>{
+  jerry.style.marginLeft="";
+  jerry.style.marginTop="";
+});
 
-  // Preserve hooks used by the reconstructed archive.
-  if(key==="marvin") localStorage.setItem("marvinDoll","true");
-  if(key==="piano") localStorage.setItem("crapPiano","true");
-  if(key==="camera") localStorage.setItem("camera","true");
-
-  toast(itemNames[key]+" purchased");
-}
-
-function toast(text){
-  const n=document.getElementById("notice");
-  n.textContent=text;n.style.display="block";
+function toast(t){
+  notice.textContent=t;
+  notice.style.display="block";
   clearTimeout(window.__toast);
-  window.__toast=setTimeout(()=>n.style.display="none",1700);
+  window.__toast=setTimeout(()=>notice.style.display="none",1500);
 }
-
-// Browsers require one user interaction before autoplaying audio.
-if(unlocked){
-  const music=document.getElementById("music");
-  const startMusic=()=>{
-    music.volume=.5;
-    music.play().catch(()=>{});
-    document.removeEventListener("pointerdown",startMusic);
-    document.removeEventListener("keydown",startMusic);
-  };
-  document.addEventListener("pointerdown",startMusic);
-  document.addEventListener("keydown",startMusic);
-}
-
-function toggleEnding(){
-  localStorage.setItem("endingA",localStorage.getItem("endingA")==="true"?"false":"true");
-  location.reload();
-}
-function resetStore(){
-  if(!confirm("Reset Jerry's Crap Shack purchases?")) return;
+function resetPurchases(){
   ["dog","camera","charleyyy","borat","piano","marvin"].forEach(k=>localStorage.removeItem("store_"+k));
   ["marvinDoll","crapPiano","camera"].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+function toggleEnding(){
+  localStorage.setItem("endingA",localStorage.getItem("endingA")==="true"?"false":"true");
   location.reload();
 }
 </script>
