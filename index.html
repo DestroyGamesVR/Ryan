@@ -496,7 +496,7 @@
 
           <div id="axe"></div>
 
-          <a href="https://mystufflist.github.io/characters">
+          <a href="http://ryan.destroygames.com/characters">
             <div id="marvin-corpse" class="clickable"></div>
             <div id="marvin-corpse-1" class="clickable"></div>
             <div id="marvin-corpse-2" class="clickable"></div>
@@ -583,7 +583,7 @@
     // Hill title corruption.
     let titleTimer = null;
     const normalTitle = 'SML Wiki';
-    const corruptedTitle = 'DELETE HILLF';
+    const corruptedTitle = 'REMOVE ME!!!!!!!';
 
     $('#hillf').addEventListener('mouseenter', () => {
       clearInterval(titleTimer);
@@ -649,7 +649,7 @@
     }
 
     // Optional remote header; page still works if it fails.
-    fetch('https://mystufflist.github.io/global/header.html')
+    fetch('https://ryan.destroygames.com/global/header.html')
       .then(r => r.ok ? r.text() : Promise.reject())
       .then(html => $('#header-container').innerHTML = html)
       .catch(() => {});
