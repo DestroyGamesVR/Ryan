@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=640, initial-scale=1.0">
+<title>Find Brooklyn Guy!</title>
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+  image-rendering: pixelated;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #000;
+}
+#levelarea {
+  width: 640px;
+  height: 423px;
+  overflow: hidden;
+  position: relative;
+  background: #000;
+  transform-origin: center;
+}
+#bg {
+  position: absolute;
+  inset: 0;
+  width: 753px;
+  height: 423px;
+  background: url('960x0_1.jpg') center/cover no-repeat;
+  overflow: hidden;
+}
+#bg::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow: inset 0 0 30px rgba(0,0,0,.12);
+  transition: box-shadow .5s ease;
+}
+.title, .credits, #bubble p {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  font-family: Arial, sans-serif;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    1px -1px 1px #000,-1px 1px 1px #000,-1px -1px 1px #000,
+    1px 1px 1px #000,0 2px 1px #000,0 -2px 1px #000,
+    -2px 0 1px #000,2px 0 1px #000;
+  animation: rot 1200ms infinite ease-in-out;
+}
+.title {
+  left: 120px;
+  top: 60px;
+  line-height: 21px;
+  transform: scale(2.1);
+  transform-origin: top left;
+}
+.credits {
+  left: 30px;
+  top: 160px;
+  line-height: 21px;
+  transform: scale(1.1);
+  transform-origin: top left;
+}
+#guy {
+  position: absolute;
+  right: 20px;
+  bottom: -22px;
+  z-index: 1;
+  animation: dance 1200ms infinite ease-in-out;
+}
+#playbtn {
+  position: absolute;
+  bottom: 17px;
+  left: 18px;
+  width: 213px;
+  z-index: 6;
+  cursor: pointer;
+  transition: filter .12s ease, transform .12s ease;
+}
+#playbtn:hover {
+  filter: contrast(.7) brightness(1.3);
+  transform: scale(1.015);
+}
+#playbtn:active { transform: translateY(2px) scale(.99); }
+
+#bubble {
+  position: absolute;
+  right: 60px;
+  top: 33px;
+  transform: rotate(5deg);
+  z-index: 5;
+}
+#bubble p {
+  font-size: 30px;
+  margin: 0;
+  left: 27px;
+  top: 25px;
+  transform: rotate(-9deg);
+  color: red;
+}
+#bubble img { width: 296px; }
+
+#hint {
+  position:absolute;
+  left:18px;
+  bottom:4px;
+  z-index:8;
+  font: 10px Arial,sans-serif;
+  color:rgba(255,255,255,.45);
+  opacity:0;
+  transition:opacity .2s ease;
+  pointer-events:none;
+}
+#playbtn:hover ~ #hint { opacity:1; }
+
+#scanlines {
+  position:absolute;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
+  opacity:.08;
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0,0,0,.22) 3px,
+    transparent 4px
+  );
+}
+#blink {
+  position:absolute;
+  inset:0;
+  z-index:30;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+}
+#blink.go { animation:blink 95ms steps(2,end); }
+
+@keyframes blink {
+  0% {opacity:0}
+  50% {opacity:.18}
+  100% {opacity:0}
+}
+@keyframes dance {
+  0% {transform:translateY(0) rotate(-3deg) scale(1.1)}
+  49.9% {transform:translateY(14px)}
+  50% {transform:translateY(14px) rotate(0)}
+  100% {transform:translateY(0) rotate(-3deg) scale(1.1)}
+}
+@keyframes rot {
+  0% {rotate:3deg}
+  49.9% {translate:0 1px}
+  50% {translate:0 1px;rotate:0deg}
+  100% {rotate:3deg}
+}
+.glitch { animation:glitch 120ms steps(2,end); }
+@keyframes glitch {
+  0% {transform:translate(0)}
+  25% {transform:translate(-2px,1px);filter:contrast(1.25)}
+  50% {transform:translate(2px,-1px);filter:brightness(.75)}
+  100% {transform:translate(0)}
+}
+</style>
+</head>
+<body>
+<div id="levelarea">
+  <div id="bg">
+    <p class="title">FIND<br>BROOKLYN GUY!</p>
+    <p class="credits">By Babyherc1000<br>&amp;deathofserenity</p>
+
+    <div id="bubble">
+      <p>come find me!</p>
+      <img src="bubble.png" draggable="false" alt="">
+    </div>
+
+    <img src="base_2.png" id="guy" draggable="false" alt="">
+    <img src="New_Project_27_1.png" id="playbtn" draggable="false" alt="Play">
+    <span id="hint">click to start</span>
+  </div>
+
+  <div id="scanlines"></div>
+  <div id="blink"></div>
+</div>
+
+<audio src="awshucks.mp3" id="win" preload="auto"></audio>
+<audio src="guy1.ogg" id="amb" autoplay loop></audio>
+
+<script>
+const area = document.getElementById('levelarea');
+const bg = document.getElementById('bg');
+const guy = document.getElementById('guy');
+const bubble = document.getElementById('bubble');
+const bubbleText = bubble.querySelector('p');
+const play = document.getElementById('playbtn');
+const amb = document.getElementById('amb');
+const blink = document.getElementById('blink');
+
+const originalVolume = 1;
+amb.volume = localStorage.getItem('radio_active') === 'true' ? 0 : originalVolume;
+
+window.addEventListener('storage', () => {
+  amb.volume = localStorage.getItem('radio_active') === 'true' ? 0 : originalVolume;
+});
+
+/*
+  Keep level zero mostly cheerful.
+  The creepy stuff should build across later game screens,
+  not ruin the joke immediately.
+*/
+const visits = Number(localStorage.getItem('findGuyVisits') || '0') + 1;
+localStorage.setItem('findGuyVisits', String(visits));
+
+if (visits >= 3) {
+  // Returning players get one tiny "was that different?" change.
+  setTimeout(() => {
+    bubbleText.textContent = 'you came back!';
+    setTimeout(() => bubbleText.textContent = 'come find me!', 1800);
+  }, 2200);
+}
+
+function tinyGlitch() {
+  area.classList.remove('glitch');
+  void area.offsetWidth;
+  area.classList.add('glitch');
+  setTimeout(() => area.classList.remove('glitch'), 150);
+}
+
+// Very rare, intentionally mild title-screen event.
+if (Math.random() < .16) {
+  setTimeout(() => {
+    blink.classList.add('go');
+    tinyGlitch();
+    setTimeout(() => blink.classList.remove('go'), 130);
+  }, 3500 + Math.random() * 3000);
+}
+
+play.addEventListener('click', () => {
+  // Store progression so later levels can react to the player.
+  localStorage.setItem('findGuyStarted', 'true');
+  localStorage.setItem('findGuyStartTime', String(Date.now()));
+
+  // A tiny transition keeps the homemade-game feel.
+  play.style.pointerEvents = 'none';
+  area.style.transition = 'filter 180ms ease';
+  area.style.filter = 'brightness(.55)';
+
+  setTimeout(() => {
+    location.href = '1.html';
+  }, 180);
+});
+</script>
+</body>
+</html>

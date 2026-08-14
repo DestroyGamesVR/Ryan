@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SML Wiki</title>
+  <meta name="description" content="A fan-made horror recreation inspired by the SML Wiki experience." />
+  <link rel="icon" type="image/png" href="images/8d6ukgXfD78J.png" />
+
+  <style>
+    :root {
+      --frame-w: 999px;
+      --frame-h: 666px;
+      --blood: #6e0000;
+      --blood-bright: #b30000;
+      --fog: rgba(255,255,255,.06);
+      --text: #f2f2f2;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #000;
+      color: var(--text);
+      overflow-x: hidden;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    body {
+      cursor: url('images/E3A7xmQj23XZ.png'), auto;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(90,0,0,.13), transparent 36%),
+        #000;
+    }
+
+    a, button, .clickable {
+      cursor: url('images/KNIwpF7tfICE.png'), pointer !important;
+    }
+
+    #page {
+      min-height: 100vh;
+      padding: 38px 12px 70px;
+      position: relative;
+    }
+
+    #page::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.018) 0,
+          rgba(255,255,255,.018) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      opacity: .2;
+      z-index: 50;
+    }
+
+    #frame-shell {
+      width: min(var(--frame-w), calc(100vw - 24px));
+      aspect-ratio: 999 / 666;
+      margin: 0 auto;
+      position: relative;
+      filter: drop-shadow(0 0 22px rgba(120,0,0,.2));
+    }
+
+    #frame {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #400;
+      background: #140000;
+      isolation: isolate;
+    }
+
+    #frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 30;
+      box-shadow:
+        inset 0 0 100px rgba(0,0,0,.85),
+        inset 0 0 18px rgba(110,0,0,.28);
+    }
+
+    .background,
+    .foreground {
+      position: absolute;
+      inset: 0;
+    }
+
+    .background {
+      background: #200;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .background video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .9;
+      filter: contrast(1.08) brightness(.82);
+    }
+
+    .foreground { z-index: 2; }
+
+    .clickable {
+      position: absolute;
+      transition: filter 180ms ease, transform 180ms ease;
+    }
+
+    .clickable:hover {
+      transform: scale(1.012);
+      filter: brightness(1.06);
+    }
+
+    #hillb {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 101%;
+      height: 100%;
+      background: url('images/34akVYmlpZOC.png') center bottom / contain no-repeat;
+      z-index: 1;
+      filter: blur(1.5px);
+      transition: filter .2s ease-out;
+    }
+
+    #hilla {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('images/KGS6rdAvrW8A.png') center bottom / contain no-repeat;
+      z-index: 2;
+    }
+
+    #hillf {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 30%;
+      background: url('images/uejHdXV0e9H7.png') center bottom / contain no-repeat;
+      z-index: 5;
+    }
+
+    #house1, #house1-A, #house1-B {
+      position: absolute;
+      bottom: 40.8%;
+      left: 7.2%;
+      width: 38.9%;
+      height: 28.2%;
+    }
+
+    #house1 {
+      background: url('images/GP5rDKTE9mTf.png') center / contain no-repeat;
+      z-index: 4;
+    }
+
+    #house1-A {
+      display: none;
+      background: url('images/fEC9eII8BPkp.png') center / contain no-repeat;
+      z-index: 5;
+      animation: fallLeft .3s ease-out forwards;
+    }
+
+    #house1-B {
+      display: none;
+      background: url('images/ZHRKp0iyfhjg.png') center / contain no-repeat;
+      z-index: 3;
+      animation: fallRight .36s ease-out forwards;
+    }
+
+    #house2 {
+      position: absolute;
+      bottom: 40.8%;
+      left: 61.2%;
+      width: 38.9%;
+      height: 25.8%;
+      background: url('images/InF9J6yeoeSm.png') center bottom / contain no-repeat;
+      z-index: 4;
+      filter: blur(1.5px);
+      transition: filter .2s ease-out;
+    }
+
+    @keyframes fallLeft {
+      0% { transform: translateX(0) rotate(0); }
+      20% { transform: translateX(-22px) rotate(2deg); }
+      100% { transform: translateX(-28px) rotate(-1deg); }
+    }
+
+    @keyframes fallRight {
+      0% { transform: translateX(0) rotate(0); }
+      20% { transform: translateX(29px) rotate(-1deg); }
+      100% { transform: translateX(34px) rotate(1.5deg); }
+    }
+
+    #marvin-corpse,
+    #marvin-corpse-1 {
+      position: absolute;
+      bottom: 20.1%;
+      left: 74.2%;
+      width: 19.6%;
+      height: 15%;
+    }
+
+    #marvin-corpse {
+      background: url('images/M2GbrR7CxF2N.png') center / contain no-repeat;
+      z-index: 3;
+      animation: jitter 420ms infinite;
+    }
+
+    #marvin-corpse-1 {
+      background: url('images/0Oh9A2h04ujO.png') center / contain no-repeat;
+      z-index: 3;
+      animation: jitter 500ms infinite;
+    }
+
+    #marvin-corpse-2 {
+      position: absolute;
+      bottom: 23.5%;
+      left: 75%;
+      width: 6.2%;
+      height: 9.8%;
+      background: url('images/39o0uqB1rqDu.png') center / contain no-repeat;
+      z-index: 5;
+      animation: jitter 530ms infinite;
+    }
+
+    @keyframes jitter {
+      0%,100% { transform: rotate(0deg); }
+      100% { transform: rotate(.3deg); }
+      30% { transform: rotate(-.7deg); }
+      50% { transform: rotate(-.2deg); }
+      70% { transform: rotate(.15deg); }
+      90% { transform: rotate(-.6deg); }
+    }
+
+    #lillogan {
+      position: absolute;
+      left: 55.6%;
+      top: 54.5%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+    }
+
+    #lillogan img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    #phantom {
+      position: absolute;
+      top: 38.4%;
+      right: .3%;
+      z-index: 6;
+      animation: float alternate ease-in-out 2.5s infinite;
+      filter: blur(1.5px);
+      transition: filter 423ms ease-out;
+    }
+
+    #phantomc {
+      position: absolute;
+      animation: travel 25s infinite linear;
+    }
+
+    @keyframes float {
+      from { transform: translateY(3px); }
+      to { transform: translateY(-1px); }
+    }
+
+    @keyframes travel {
+      0% { transform: translate(-361px,50px); opacity: 0; }
+      15% { opacity: 1; }
+      25% { transform: translate(-206px,-5px); opacity: 0; }
+      30% { opacity: 1; }
+      50% { transform: translate(-101px,15px); opacity: 0; }
+      59% { opacity: 1; }
+      75% { transform: translate(-381px,-15px); opacity: 0; }
+      80% { opacity: 1; }
+      100% { transform: translate(-381px,-15px); opacity: 0; }
+    }
+
+    #computer-trigger {
+      position: absolute;
+      left: 17.4%;
+      top: 88.4%;
+      transform: translate(-50%, -50%);
+      z-index: 7;
+    }
+
+    #axe {
+      display: none;
+      position: absolute;
+      width: 39%;
+      height: 21%;
+      background-position: center;
+      background-size: cover;
+      z-index: 8;
+      animation: axeAnimation .2s ease-out forwards;
+    }
+
+    @keyframes axeAnimation {
+      0% {
+        transform: rotate(-60deg) translateY(-50px) translateX(-300px);
+        background-image: url('images/eIxHAdKCL2BZ.png');
+      }
+      50% {
+        transform: rotate(0) translateY(190px) translateX(-110px);
+        background-image: url('images/eIxHAdKCL2BZ.png');
+      }
+      66% {
+        transform: rotate(-2deg) translateY(270px) translateX(-90px);
+        background-image: url('images/mghv68OCLyIe.png');
+      }
+      100% {
+        transform: rotate(0) translateY(250px) translateX(-80px);
+        background-image: url('images/mghv68OCLyIe.png');
+      }
+    }
+
+    #area-title {
+      min-height: 44px;
+      width: min(var(--frame-w), calc(100vw - 24px));
+      margin: 10px auto 0;
+      text-align: center;
+      font-size: clamp(22px, 3.5vw, 36px);
+      color: white;
+      opacity: 0;
+      transform: scale(.98);
+      transition: opacity 223ms ease-out, transform 223ms ease-out;
+      text-shadow: 0 2px 10px #000, 0 0 8px rgba(160,0,0,.3);
+      pointer-events: none;
+    }
+
+    #area-title.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    #sense-warning {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      max-width: calc(100vw - 20px);
+      padding: 9px 34px 9px 12px;
+      background: rgba(100,0,0,.82);
+      border: 1px solid #555;
+      color: #eee;
+      font: 13px Arial, sans-serif;
+      box-shadow: 0 5px 20px #000;
+    }
+
+    #close-warning {
+      position: absolute;
+      right: 7px;
+      top: 5px;
+      border: 0;
+      background: transparent;
+      color: white;
+      font-size: 18px;
+    }
+
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      place-items: center;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-size: clamp(20px, 3vw, 34px);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(255,255,255,.25);
+      user-select: none;
+    }
+
+    #splash.active {
+      display: grid;
+      animation: splashscreen 6.66s forwards;
+    }
+
+    @keyframes splashscreen {
+      0% { filter: brightness(0); opacity: 1; }
+      10%,54% { filter: brightness(1); opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+
+    #flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: rgba(255,255,255,.9);
+      opacity: 0;
+      z-index: 900;
+    }
+
+    #flash.go {
+      animation: flash 110ms steps(2,end);
+    }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      40% { opacity: .36; }
+      100% { opacity: 0; }
+    }
+
+    .glitch-once {
+      animation: glitch .16s steps(2,end) 1;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); filter: none; }
+      25% { transform: translate(-2px,1px); filter: contrast(1.4); }
+      50% { transform: translate(2px,-1px); filter: hue-rotate(12deg); }
+      75% { transform: translate(-1px,0); }
+      100% { transform: translate(0); filter: none; }
+    }
+
+    @media (max-width: 700px) {
+      #page { padding-top: 55px; }
+      #frame-shell { width: calc(100vw - 12px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="flash"></div>
+  <div id="splash"></div>
+
+  <div id="sense-warning">
+    <strong>Note:</strong> fan-made restoration / horror recreation
+    <button id="close-warning" aria-label="Close warning">×</button>
+  </div>
+
+  <div id="header-container"></div>
+
+  <main id="page">
+    <div id="frame-shell">
+      <div id="frame">
+        <div class="background">
+          <video src="media/ZqFdRtbcOA8t.webm" loop preload="auto" autoplay muted playsinline></video>
+        </div>
+
+        <div class="foreground">
+          <div id="hillf"></div>
+
+          <span id="computer-trigger">
+            <img src="images/AvpcNkQYUXmb.png" class="clickable" alt="">
+          </span>
+
+          <div id="hilla"></div>
+
+          <span id="lillogan">
+            <a href="/logan/"><img src="images/wMINB8ujamxF.gif" alt=""></a>
+          </span>
+
+          <div id="hillb"></div>
+
+          <span id="phantom">
+            <a href="https://mystufflist.github.io/characters/silhouette">
+              <span id="phantomc"><img src="images/XN1ORl7M39gd.png" width="36" alt=""></span>
+            </a>
+          </span>
+
+          <div id="house1" class="clickable"></div>
+          <div id="house1-A"></div>
+          <div id="house1-B"></div>
+
+          <a href="/game/house/">
+            <div id="house2" class="clickable"></div>
+          </a>
+
+          <div id="axe"></div>
+
+          <a href="https://mystufflist.github.io/characters">
+            <div id="marvin-corpse" class="clickable"></div>
+            <div id="marvin-corpse-1" class="clickable"></div>
+            <div id="marvin-corpse-2" class="clickable"></div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="area-title" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const areaTitle = $('#area-title');
+    const frame = $('#frame');
+
+    // Sound stays local to your recovered site.
+    const axeSound = new Audio('media/axe.ogg');
+    axeSound.preload = 'auto';
+
+    function setArea(text) {
+      areaTitle.textContent = text;
+      areaTitle.classList.add('show');
+    }
+
+    function clearArea() {
+      areaTitle.classList.remove('show');
+    }
+
+    function hoverText(selector, text) {
+      const el = $(selector);
+      if (!el) return;
+      el.addEventListener('mouseenter', () => setArea(text));
+      el.addEventListener('mouseleave', clearArea);
+    }
+
+    hoverText('#house1', 'Visit the new house');
+    hoverText('#house2', 'Explore the old house');
+    hoverText('#marvin-corpse-2', "Discover Marvin's corpse");
+    hoverText('#computer-trigger', '...');
+    hoverText('#phantom', 'Do you see him?');
+
+    // New-house hit animation.
+    $('#house1').addEventListener('click', () => {
+      $('#house1').style.display = 'none';
+      $('#house1-A').style.display = 'block';
+      $('#house1-B').style.display = 'block';
+      $('#axe').style.display = 'block';
+
+      axeSound.currentTime = 0;
+      axeSound.play().catch(() => {});
+
+      $('#flash').classList.remove('go');
+      void $('#flash').offsetWidth;
+      $('#flash').classList.add('go');
+
+      setTimeout(() => {
+        window.location.href = '/newhouse/crew/';
+      }, 1300);
+    });
+
+    // Old-house depth focus.
+    const hillb = $('#hillb');
+    const phantom = $('#phantom');
+    $('#house2').addEventListener('mouseenter', function () {
+      this.style.filter = 'blur(0)';
+      hillb.style.filter = 'blur(.7px)';
+      phantom.style.filter = 'blur(.4px)';
+    });
+
+    $('#house2').addEventListener('mouseleave', function () {
+      this.style.filter = 'blur(1.5px)';
+      hillb.style.filter = 'blur(1.5px)';
+      phantom.style.filter = 'blur(1.5px)';
+    });
+
+    phantom.addEventListener('mouseenter', () => phantom.style.filter = 'blur(0)');
+    phantom.addEventListener('mouseleave', () => phantom.style.filter = 'blur(1.5px)');
+
+    $('#computer-trigger').addEventListener('click', () => {
+      window.location.href = '/computer/';
+    });
+
+    // Hill title corruption.
+    let titleTimer = null;
+    const normalTitle = 'SML Wiki';
+    const corruptedTitle = 'DELETE HILLF';
+
+    $('#hillf').addEventListener('mouseenter', () => {
+      clearInterval(titleTimer);
+      let index = 0;
+      titleTimer = setInterval(() => {
+        const chars = corruptedTitle.split('');
+        chars[index] = Math.random() < .5
+          ? chars[index].toLowerCase()
+          : chars[index].toUpperCase();
+        document.title = chars.join('');
+        index = (index + 1) % chars.length;
+      }, 55);
+    });
+
+    $('#hillf').addEventListener('mouseleave', () => {
+      clearInterval(titleTimer);
+      document.title = normalTitle;
+    });
+
+    // Persistent Lil Logan secret.
+    function updateLilLogan() {
+      if (localStorage.getItem('lilloganClicked') === 'true') {
+        $('#lillogan').style.display = 'none';
+      }
+    }
+
+    updateLilLogan();
+
+    $('#lillogan').addEventListener('click', () => {
+      localStorage.setItem('lilloganClicked', 'true');
+    });
+
+    // Warning dismissal.
+    if (localStorage.getItem('warningClosed') === 'true') {
+      $('#sense-warning').style.display = 'none';
+    }
+
+    $('#close-warning').addEventListener('click', () => {
+      $('#sense-warning').style.display = 'none';
+      localStorage.setItem('warningClosed', 'true');
+    });
+
+    // Horror splash has a low chance to appear.
+    const splashMessages = [
+      '7 ciphers, 7 letters, 1 meaning',
+      '6 out of 7…',
+      'you have been here before',
+      'one of them is missing'
+    ];
+
+    if (Math.random() < .28) {
+      const splash = $('#splash');
+      splash.textContent = splashMessages[Math.floor(Math.random() * splashMessages.length)];
+      splash.classList.add('active');
+    }
+
+    // Subtle one-off corruption. Rare enough that it feels discovered.
+    if (Math.random() < .18) {
+      setTimeout(() => {
+        frame.classList.add('glitch-once');
+        setTimeout(() => frame.classList.remove('glitch-once'), 220);
+      }, 3500 + Math.random() * 7000);
+    }
+
+    // Optional remote header; page still works if it fails.
+    fetch('https://mystufflist.github.io/global/header.html')
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(html => $('#header-container').innerHTML = html)
+      .catch(() => {});
+  </script>
+</body>
+</html>

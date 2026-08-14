@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Find Brooklyn Guy - smlwiki.com</title>
+  <meta name="description" content="Jump in!">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #000;
+      color: #eee;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(90,0,0,.09), transparent 34%),
+        #000;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      opacity: .14;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 2px,
+          rgba(255,255,255,.025) 3px,
+          transparent 4px
+        );
+    }
+
+    #header-container {
+      position: relative;
+      z-index: 20;
+    }
+
+    #page {
+      min-height: 100vh;
+      padding: 28px 12px 70px;
+    }
+
+    #title {
+      width: min(640px, calc(100vw - 24px));
+      margin: 0 auto 14px;
+      text-align: center;
+      font: 24px Georgia, "Times New Roman", serif;
+      letter-spacing: .03em;
+      color: #eee;
+      text-shadow: 0 0 12px rgba(130,0,0,.25);
+    }
+
+    #subtitle {
+      width: min(640px, calc(100vw - 24px));
+      margin: -5px auto 14px;
+      text-align: center;
+      color: #777;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    #game-shell {
+      width: min(642px, calc(100vw - 24px));
+      aspect-ratio: 640 / 423;
+      margin: 0 auto;
+      position: relative;
+      background: #050505;
+      border: 1px solid #252525;
+      box-shadow:
+        0 0 28px rgba(80,0,0,.15),
+        inset 0 0 40px rgba(0,0,0,.45);
+      overflow: hidden;
+      animation: appear 1.15s ease both;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        filter: brightness(0);
+        transform: scale(.995);
+      }
+      to {
+        opacity: 1;
+        filter: brightness(1);
+        transform: scale(1);
+      }
+    }
+
+    #game-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      box-shadow: inset 0 0 45px rgba(0,0,0,.4);
+    }
+
+    iframe {
+      border: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    #status {
+      width: min(640px, calc(100vw - 24px));
+      min-height: 30px;
+      margin: 10px auto 0;
+      text-align: center;
+      color: #666;
+      font: italic 13px Georgia, serif;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+
+    #status.show {
+      opacity: 1;
+    }
+
+    #flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 90;
+      background: white;
+      opacity: 0;
+    }
+
+    #flash.go {
+      animation: flash 90ms steps(2,end);
+    }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      40% { opacity: .1; }
+      100% { opacity: 0; }
+    }
+
+    .glitch {
+      animation: glitch 120ms steps(2,end);
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      25% { transform: translate(-2px,1px); filter: contrast(1.3); }
+      50% { transform: translate(2px,-1px); filter: brightness(.7); }
+      75% { transform: translate(-1px,0); }
+      100% { transform: translate(0); }
+    }
+
+    @media (max-width: 680px) {
+      #page { padding-top: 18px; }
+      #title { font-size: 21px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="flash"></div>
+  <div id="header-container"></div>
+
+  <main id="page">
+    <div id="title">Find Brooklyn Guy</div>
+    <div id="subtitle">find him.</div>
+
+    <div id="game-shell">
+      <iframe
+        id="game"
+        src="./game/0.html"
+        title="Find Brooklyn Guy"
+        width="640"
+        height="423"
+        frameborder="0"
+        allow="autoplay">
+      </iframe>
+    </div>
+
+    <div id="status"></div>
+  </main>
+
+  <script>
+    const shell = document.getElementById('game-shell');
+    const status = document.getElementById('status');
+    const flash = document.getElementById('flash');
+
+    // Keep the outer page quiet. The real horror should come from the game.
+    // These rare events are only enough to make the launcher feel slightly "off".
+    const messages = [
+      'keep looking',
+      'he is somewhere in there',
+      'you missed him',
+      'did that move?'
+    ];
+
+    function showStatus(text) {
+      status.textContent = text;
+      status.classList.add('show');
+      setTimeout(() => status.classList.remove('show'), 2400);
+    }
+
+    function rareOuterEvent() {
+      if (Math.random() < .22) {
+        shell.classList.add('glitch');
+        setTimeout(() => shell.classList.remove('glitch'), 150);
+      }
+
+      if (Math.random() < .18) {
+        showStatus(messages[Math.floor(Math.random() * messages.length)]);
+      }
+
+      if (Math.random() < .08) {
+        flash.classList.remove('go');
+        void flash.offsetWidth;
+        flash.classList.add('go');
+      }
+
+      setTimeout(rareOuterEvent, 9000 + Math.random() * 16000);
+    }
+
+    setTimeout(rareOuterEvent, 10000);
+
+    // Optional remote header.
+    fetch('https://mystufflist.github.io/global/header.html')
+      .then(response => {
+        if (!response.ok) throw new Error('header unavailable');
+        return response.text();
+      })
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

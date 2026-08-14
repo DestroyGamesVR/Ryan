@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<style>
+    body {
+        margin: 0;
+    }
+
+    html {
+        overflow: hidden;
+    }
+
+    * {
+        user-select: none;
+        image-rendering: pixelated;
+    }
+
+    #showleft, #showright {
+        position: absolute;
+        height: 423px;
+        width: 128px;
+        z-index: 3;
+        user-select: none;
+    }
+
+    #showleft {
+        left: 0;
+    }
+
+    #showright {
+        right: 0;
+    }
+
+    p {
+        position: absolute;
+        right: 13px;
+        top: -11px;
+        text-align: end;
+        z-index: 4;
+        pointer-events: none;
+        font-family: Arial;
+        font-weight: 900;
+        color: #fff;
+        font-size: 19px;
+        text-shadow: 1px -1px 1px #000, -1px 1px 1px #000, -1px -1px 1px #000, 1px 1px 1px #000, 0 0 1px #000, 0 0 1px #000, 0 2px 1px #000, 0 -2px 1px #000, -2px 0 1px #000, 0 0 1px #000, 2px 0 1px #000, 0 0 1px #000;
+    }
+
+    #levelarea {
+        width: 640px;
+        height: 423px;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: block;
+        position: relative;
+    }
+
+    #bg {
+        background-image: url('levels/2bg.webp');
+        height: 423px;
+        width: 753px;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    #fg {
+        height: 423px;
+        width: 753px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        z-index: 2;
+        position: absolute;
+        pointer-events: none;
+    }
+
+    #bgelms {
+        position: absolute;
+        width: 753px;
+    }
+
+    #bgelms img {
+        position: absolute;
+        background-size: cover;
+        background-repeat: no-repeat;
+        width: 753px;
+        pointer-events: none;
+    }
+
+    #guy {
+        position: absolute;
+        width: 59px;
+        z-index: 1;
+        cursor: pointer;
+        bottom: 50px;
+        left: 280px;
+    }
+
+    @keyframes find {
+        0% {
+            transform: translateY(0);
+        }
+
+        7% {
+            transform: translateY(-1px) rotate(2deg);
+        }
+
+        42% {
+            transform: translateY(-28px) rotate(-1deg);
+        }
+
+        100% {
+            transform: translateY(-24px);
+        }
+    }
+
+    #levelarea { transition:filter .55s ease; }
+    #levelarea::after {
+        content:"";
+        position:absolute;
+        inset:0;
+        z-index:20;
+        pointer-events:none;
+        opacity:.045;
+        background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.3) 3px,transparent 4px);
+    }
+    #level-note {
+        position:absolute;
+        left:12px;
+        bottom:8px;
+        z-index:30;
+        font:italic 11px Georgia,serif;
+        color:rgba(255,255,255,.5);
+        opacity:0;
+        pointer-events:none;
+        transition:opacity .25s ease;
+    }
+    #level-note.show { opacity:1; }
+    .micro-glitch { animation:microglitch 130ms steps(2,end); }
+    @keyframes microglitch {
+      0%{transform:translate(0)}
+      25%{transform:translate(-2px,0);filter:contrast(1.2)}
+      60%{transform:translate(1px,1px);filter:brightness(.88)}
+      100%{transform:translate(0)}
+    }
+
+</style>
+<div id="levelarea">
+    <p>LEVEL 2</p>
+    <div id="showleft" onmouseover="look('left')" onmouseout="stand()" class="controls"></div>
+    <div id="showright" onmouseover="look('right')" onmouseout="stand()" class="controls"></div>
+    <div id="bg">
+        <img src="levels/2guy.png" id="guy" style="z-index: 0;">
+        <div id="bgelms">
+            <img src="levels/2fg.webp">
+        </div>
+    </div>
+<div id="level-note"></div>
+</div>
+<audio src="awshucks.mp3" id="win"></audio>
+<audio src="guy3.ogg" id="bgm" autoplay loop></audio>
+<audio src="Splash.ogg" id="splash"></audio>
+<script>
+    let interval;
+    let movement = 0;
+    function look(direction) {
+        const bg = document.getElementById('bg');
+        const increment = 1.5;
+        interval = setInterval( () => {
+            if (direction === 'left' && movement < 0) {
+                movement += increment;
+            } else if (direction === 'right' && movement > (640 - 753)) {
+                movement -= increment;
+            }
+            bg.style.transform = `translateX(${movement}px)`;
+        }
+        , 10);
+    }
+    function stand() {
+        clearInterval(interval);
+    }
+</script>
+<script>
+    <!--anims-->
+    document.getElementById("guy").addEventListener("click", function() {
+        this.style.animation = "find steps(5, end) forwards 512ms";
+        document.getElementById("splash").play();
+        setTimeout( () => {
+            document.getElementById("win").play();
+        }
+        , 633);
+        var controls = document.getElementsByClassName("controls");
+        for (var i = 0; i < controls.length; i++) {
+            controls[i].style.pointerEvents = "none";
+            document.getElementById("bgm").pause();
+        }
+        setTimeout( () => {
+            window.location.replace("3.html", );
+        }
+        , 4333);
+    });
+</script>
+<script>
+    let e = bgm.volume
+      , t = () => {
+        bgm.volume = "true" === localStorage.getItem("radio_active") ? 0 : e
+    }
+    ;
+    t(),
+    window.addEventListener("storage", t)
+</script>
+
+<script>
+(() => {
+  localStorage.setItem("findGuyLevel", "2");
+  const area = document.getElementById("levelarea");
+  const note = document.getElementById("level-note");
+
+  function showNote(t) {
+    note.textContent=t;
+    note.classList.add("show");
+    setTimeout(()=>note.classList.remove("show"),1800);
+  }
+
+  // A tiny clue that the game is going somewhere strange.
+  setTimeout(() => {
+    if (Math.random() < .28) {
+      area.classList.add("micro-glitch");
+      showNote("keep going");
+      setTimeout(()=>area.classList.remove("micro-glitch"),180);
+    }
+  }, 5000 + Math.random()*3500);
+
+  document.getElementById("guy").addEventListener("click", () => {
+    localStorage.setItem("findGuyFound2","true");
+  }, {once:true});
+})();
+</script>

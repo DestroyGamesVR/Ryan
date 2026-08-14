@@ -1,0 +1,40 @@
+<!DOCTYPE html> <html lang="en"> <meta charset="UTF-8"> <link rel="preload" href="character_pages.css" as="style" onload="this.onload=null;this.rel='stylesheet'"> <noscript><link rel="stylesheet" href="character_pages.css"></noscript>
+<body> <div id="header-container"></div>
+  <div id="container"><div id="text-content">
+    <h1 style="padding-bottom: 42px; border-bottom: solid 1px #500;">Marvin</h1>
+        <div class="text-entry">
+                <h2>General Info</h2>
+                <p>Marvin is a screaming, balding, red-in-the face lazy piece of fuck with absolutely ZERO tricks up his sleeve. He yells all the time, he isn’t fast, his kicks are clumsy, he's got no submission defense, he has no ground skills, he gets no head from his bimbo wife and he is pure trash. I would eat him alive.</p>
+            </div>
+        <div class="text-entry">
+                <h2>Occupation</h2>
+                <p>Marvin is an extremely cloneable and willing vessel, but not capable of creating useful results. He can be spotted in many facilities and sometimes the greater campus. I need to mention that I would happily eat Marvin, even in front of thousands of people. I would gladly eat him after I've picked at his brain for 30 minutes straight.</p>
+            </div>
+        <div class="text-entry">
+                <h2>Quotes</h2>
+                <i>"Jeffy you are stupid ohhh ohhh Get my head all sour"</i><br>
+                <i>"i'm in the mood to stink up a dew"</i><br>
+                <i>"Fuck you Loretta Jason Derulo Marshawn porn truck"</i><br>
+                <i>"CRAB GIVING BIRTH FUCK YOU FUCK YOU"</i><br>
+            </div>
+                        </div>
+<div id="image-frame"> <div class="textbox">Appearance:</div> <div class="appearance-buttons">
+    <button onclick="changeAppearance('current')">Current</button>
+    <button onclick="changeAppearance('former')">Former</button> </div>
+<div id="image-container"> <img src="marvinblood.jpeg"> </div>
+<div class="infobox"><span style="opacity: 0.03;">GNDWUO,</span>I would eat him</div> </div>
+  </div>
+<script> changeAppearance('current');
+function changeAppearance(appearance) {
+  const buttons = document.querySelectorAll('.appearance-buttons button');
+        buttons.forEach(btn => btn.classList.remove('pressed'));
+  const image = document.querySelector('#image-container img');
+       if (appearance === 'current') { image.src = 'marvinblood.jpeg';
+} else if (appearance === 'former') { image.src = 'previousmarvin.jpg'; }
+  const pressedButton = Array.from(buttons).find(button => button.innerText.toLowerCase().includes(appearance)); pressedButton.classList.add('pressed'); }
+  function playAmb() {
+  const audio = new Audio('https://nez.fyi/sml-assets/char.ogg'); audio.loop = true; audio.play();
+   document.body.removeEventListener('mousemove', playAmb); } document.body.addEventListener('mousemove', playAmb);
+</script> </body> </html>
+
+<script> fetch('../global/header.html') .then(response => response.text()) .then(html => { document.getElementById('header-container').innerHTML = html; }) .catch(error => console.error('error fetching header:', error)); </script>

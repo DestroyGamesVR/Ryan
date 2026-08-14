@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SML Wiki - Crew</title>
+
+  <style>
+    :root {
+      --scene-w: 640;
+      --scene-h: 480;
+      --blood: #6e0000;
+      --text: #e9e9e9;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #000;
+      color: var(--text);
+    }
+
+    body {
+      overflow-x: hidden;
+      cursor: url('images/cursor.png'), auto;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(85, 0, 0, .12), transparent 35%),
+        #000;
+    }
+
+    a, button, .clickable {
+      cursor: url('images/cursorclick.png'), pointer !important;
+    }
+
+    #page {
+      min-height: 100vh;
+      padding: 54px 12px 80px;
+      position: relative;
+    }
+
+    /* Very faint CRT texture */
+    #page::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          rgba(255,255,255,.018) 3px,
+          transparent 4px
+        );
+      opacity: .35;
+    }
+
+    #frame-shell {
+      width: min(640px, calc(100vw - 24px));
+      aspect-ratio: 4 / 3;
+      margin: 0 auto;
+      position: relative;
+      filter: drop-shadow(0 0 24px rgba(90,0,0,.18));
+      animation: fadeIn 1.5s ease both;
+    }
+
+    #frame {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #250000;
+      background: #080000;
+      isolation: isolate;
+      transform-origin: center;
+    }
+
+    #frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      box-shadow:
+        inset 0 0 85px rgba(0,0,0,.82),
+        inset 0 0 15px rgba(100,0,0,.18);
+    }
+
+    #frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 21;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 45%, transparent 38%, rgba(0,0,0,.38) 100%);
+    }
+
+    @keyframes fadeIn {
+      0%, 35% { opacity: 0; filter: brightness(0); }
+      100% { opacity: 1; filter: brightness(1); }
+    }
+
+    #front-image {
+      position: absolute;
+      inset: -2%;
+      width: 104%;
+      height: 104%;
+      object-fit: cover;
+      z-index: 1;
+      animation: camDrift 18s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: brightness(.92) contrast(1.05);
+      transition: filter .25s ease;
+    }
+
+    @keyframes camDrift {
+      0%   { transform: translate(-2px, 3px) scale(1.018) rotate(0deg); }
+      22%  { transform: translate(1px, 2px) scale(1.021) rotate(.25deg); }
+      48%  { transform: translate(2px,-1px) scale(1.019) rotate(-.12deg); }
+      73%  { transform: translate(-2px, 1px) scale(1.023) rotate(.18deg); }
+      100% { transform: translate(-2px, 3px) scale(1.018) rotate(0deg); }
+    }
+
+    #particle-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 4;
+      pointer-events: none;
+      filter: blur(5px);
+      opacity: .13;
+    }
+
+    .clickable {
+      position: absolute;
+      z-index: 10;
+      border: 0;
+      background: transparent;
+      transition:
+        background .16s ease,
+        box-shadow .16s ease,
+        filter .16s ease;
+    }
+
+    /* Tiny highlight only when the visitor is directly over someone */
+    .clickable:hover {
+      background: radial-gradient(circle, rgba(120,0,0,.09), transparent 68%);
+      box-shadow: inset 0 0 22px rgba(110,0,0,.08);
+    }
+
+    #crew-label {
+      width: min(640px, calc(100vw - 24px));
+      min-height: 38px;
+      margin: 12px auto 0;
+      text-align: center;
+      font-size: clamp(18px, 4vw, 28px);
+      letter-spacing: .03em;
+      opacity: 0;
+      transform: translateY(-3px);
+      transition: opacity .2s ease, transform .2s ease;
+      text-shadow: 0 2px 8px #000, 0 0 8px rgba(100,0,0,.25);
+      pointer-events: none;
+    }
+
+    #crew-label.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #whisper {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      z-index: 80;
+      width: min(90vw, 700px);
+      text-align: center;
+      font: italic 15px Georgia, serif;
+      color: rgba(225,225,225,.75);
+      opacity: 0;
+      pointer-events: none;
+      text-shadow: 0 2px 6px #000;
+    }
+
+    #whisper.show {
+      animation: whisper 3.2s ease both;
+    }
+
+    @keyframes whisper {
+      0% { opacity: 0; filter: blur(3px); }
+      18% { opacity: .85; filter: blur(0); }
+      72% { opacity: .65; }
+      100% { opacity: 0; }
+    }
+
+    #flash {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      pointer-events: none;
+      background: #fff;
+      opacity: 0;
+    }
+
+    #flash.go {
+      animation: flash 90ms steps(2,end);
+    }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      40% { opacity: .16; }
+      100% { opacity: 0; }
+    }
+
+    #entry {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: grid;
+      place-items: center;
+      background: #000;
+      color: #ddd;
+      user-select: none;
+      transition: opacity .7s ease, visibility .7s ease;
+    }
+
+    #entry.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #entry button {
+      border: 0;
+      background: none;
+      color: #ddd;
+      font: 18px Georgia, serif;
+      letter-spacing: .08em;
+      text-transform: lowercase;
+      text-shadow: 0 0 10px rgba(255,255,255,.22);
+      opacity: .74;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    #entry button:hover {
+      opacity: 1;
+      transform: scale(1.025);
+    }
+
+    .glitch {
+      animation: glitch 150ms steps(2,end) 1;
+    }
+
+    @keyframes glitch {
+      0%   { transform: translate(0); filter: none; }
+      25%  { transform: translate(-2px,1px); filter: contrast(1.3); }
+      50%  { transform: translate(2px,-1px); filter: brightness(.6) contrast(1.5); }
+      75%  { transform: translate(-1px,0); }
+      100% { transform: translate(0); filter: none; }
+    }
+
+    @media (max-width: 680px) {
+      #page { padding-top: 38px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="entry">
+    <button id="enter-button" type="button">enter</button>
+  </div>
+
+  <div id="flash"></div>
+  <div id="header-container"></div>
+
+  <main id="page">
+    <div id="frame-shell">
+      <div id="frame">
+        <img id="front-image" src="images/0.png" alt="">
+        <canvas id="particle-canvas" width="640" height="480"></canvas>
+
+        <a href="https://mystufflist.github.io/cast/pablo.html"
+           class="crew-link"
+           data-name="Pablo"
+           data-index="0">
+          <div class="clickable"
+               style="top:30.42%; left:7.81%; width:19.53%; height:27.08%;"></div>
+        </a>
+
+        <a href="https://mystufflist.github.io/cast/lovell.html"
+           class="crew-link"
+           data-name="Lovell"
+           data-index="1">
+          <div class="clickable"
+               style="top:31.25%; left:28.59%; width:17.34%; height:22.92%;"></div>
+        </a>
+
+        <a href="https://mystufflist.github.io/cast/lance.html"
+           class="crew-link"
+           data-name="Lance"
+           data-index="2">
+          <div class="clickable"
+               style="top:35.42%; left:47.50%; width:18.75%; height:27.92%; transform:rotate(-6deg);"></div>
+        </a>
+
+        <a href="https://mystufflist.github.io/cast/logan.html"
+           class="crew-link"
+           data-name="Logan"
+           data-index="3">
+          <div class="clickable"
+               style="top:35%; left:69.53%; width:18.91%; height:29.17%;"></div>
+        </a>
+      </div>
+    </div>
+
+    <div id="crew-label" aria-live="polite"></div>
+  </main>
+
+  <div id="whisper"></div>
+
+  <script>
+    const frame = document.getElementById('frame');
+    const frontImage = document.getElementById('front-image');
+    const label = document.getElementById('crew-label');
+    const whisper = document.getElementById('whisper');
+    const flash = document.getElementById('flash');
+
+    // The original page tried to autoplay these.
+    // Browsers often block autoplay with sound, so this version starts them
+    // after the visitor presses "enter".
+    const ambience = new Audio('https://nez.fyi/sml-assets/ambience2.ogg');
+    ambience.loop = true;
+    ambience.volume = 0.42;
+
+    const badFreq = new Audio('https://nez.fyi/voidstuff/sounds-general/badfreq2.mp3');
+    badFreq.loop = true;
+    badFreq.volume = 0.16;
+
+    document.getElementById('enter-button').addEventListener('click', () => {
+      document.getElementById('entry').classList.add('hidden');
+
+      ambience.play().catch(() => {});
+      badFreq.play().catch(() => {});
+
+      localStorage.setItem('crewEntered', 'true');
+    });
+
+    // If they've visited before, the entry screen feels slightly faster.
+    if (localStorage.getItem('crewEntered') === 'true') {
+      document.getElementById('enter-button').textContent = 'return';
+    }
+
+    // Character hover behavior.
+    document.querySelectorAll('.crew-link').forEach(link => {
+      const hitbox = link.querySelector('.clickable');
+
+      hitbox.addEventListener('mouseenter', () => {
+        label.textContent = link.dataset.name;
+        label.classList.add('show');
+
+        // Slight pressure effect instead of a bright modern hover.
+        frontImage.style.filter = 'brightness(.87) contrast(1.09)';
+      });
+
+      hitbox.addEventListener('mouseleave', () => {
+        label.classList.remove('show');
+        frontImage.style.filter = 'brightness(.92) contrast(1.05)';
+      });
+
+      link.addEventListener('click', () => {
+        const visited = JSON.parse(localStorage.getItem('crewVisited') || '[]');
+        if (!visited.includes(link.dataset.name)) {
+          visited.push(link.dataset.name);
+          localStorage.setItem('crewVisited', JSON.stringify(visited));
+        }
+      });
+    });
+
+    // Particles / floating dust.
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+    const maxParticles = 42;
+
+    function createParticle() {
+      if (particles.length >= maxParticles || Math.random() > .17) return;
+
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: canvas.height + 8,
+        radius: Math.random() * 3.8 + .35,
+        speed: Math.random() * .8 + .25,
+        drift: (Math.random() - .5) * .65,
+        alpha: Math.random() * .45 + .1
+      });
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        p.y -= p.speed;
+        p.x += p.drift;
+
+        if (p.y < -10 || p.x < -15 || p.x > canvas.width + 15) {
+          particles.splice(i, 1);
+        }
+      }
+
+      createParticle();
+      requestAnimationFrame(drawParticles);
+    }
+
+    drawParticles();
+
+    // Rare "did I just see that?" events.
+    const whispers = [
+      'they are all looking at you',
+      'four people. one room.',
+      'you already picked one',
+      'don’t stay here too long'
+    ];
+
+    function showWhisper(text) {
+      whisper.textContent = text;
+      whisper.classList.remove('show');
+      void whisper.offsetWidth;
+      whisper.classList.add('show');
+    }
+
+    function rareEvent() {
+      if (Math.random() < .42) {
+        frame.classList.add('glitch');
+        setTimeout(() => frame.classList.remove('glitch'), 190);
+      }
+
+      if (Math.random() < .34) {
+        showWhisper(whispers[Math.floor(Math.random() * whispers.length)]);
+      }
+
+      if (Math.random() < .18) {
+        flash.classList.remove('go');
+        void flash.offsetWidth;
+        flash.classList.add('go');
+      }
+
+      setTimeout(rareEvent, 7000 + Math.random() * 13000);
+    }
+
+    setTimeout(rareEvent, 6500 + Math.random() * 5000);
+
+    // A tiny progression secret:
+    // after all four cast pages have been clicked at least once,
+    // the page title changes on later visits.
+    const visitedCrew = JSON.parse(localStorage.getItem('crewVisited') || '[]');
+
+    if (visitedCrew.length >= 4) {
+      document.title = 'SML Wiki - They Remember';
+      setTimeout(() => {
+        showWhisper('you found everyone');
+      }, 4200);
+    }
+
+    // Optional remote header. Failure will not break the scene.
+    fetch('https://mystufflist.github.io/global/header.html')
+      .then(response => {
+        if (!response.ok) throw new Error('header unavailable');
+        return response.text();
+      })
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

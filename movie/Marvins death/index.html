@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>The Food That Looks Good! - smlwiki.com</title>
+  <meta name="description" content="SML Movie: The Food That Looks Good!">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <style>
+    :root {
+      --red: #540000;
+      --red2: #9b0000;
+      --paper: #d8d8d8;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: #000;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: #eee;
+      cursor: url('images/cursor.png'), auto;
+      background:
+        radial-gradient(circle at center, rgba(65,0,0,.05), rgba(0,0,0,.74) 72%),
+        url('images/charred.jpeg') repeat;
+      transition:
+        filter 1.2s ease,
+        background-color 1.2s ease;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      box-shadow: inset 0 0 180px 65px rgba(0,0,0,.8);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 101;
+      pointer-events: none;
+      opacity: .13;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 2px,
+          rgba(255,255,255,.035) 3px,
+          transparent 4px
+        );
+    }
+
+    a, button, input {
+      cursor: url('images/cursorclick.png'), pointer;
+    }
+
+    #header-container {
+      position: relative;
+      z-index: 20;
+    }
+
+    #container {
+      width: min(990px, calc(100vw - 24px));
+      display: grid;
+      grid-template-columns: minmax(0, 640px) 256px;
+      gap: 34px;
+      align-items: start;
+      margin: 64px auto;
+      transition: transform 1s ease, filter 1s ease;
+    }
+
+    #video-container {
+      position: relative;
+      width: 100%;
+      margin-top: 64px;
+    }
+
+    #video-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      outline: 1px solid #300;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(70,0,0,.2);
+      transition:
+        box-shadow .8s ease,
+        transform .8s ease,
+        filter .8s ease;
+    }
+
+    #video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    #video-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      background:
+        radial-gradient(circle at center, transparent 50%, rgba(90,0,0,.22));
+      transition: opacity 1s ease;
+    }
+
+    #controls {
+      width: 100%;
+      height: 26px;
+      display: grid;
+      grid-template-columns: auto 1fr 78px auto;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(#aaa, #757575);
+      outline: 1px solid #100;
+    }
+
+    button {
+      height: 26px;
+      min-width: 42px;
+      padding: 0 9px;
+      margin: 0;
+      color: #ffea00;
+      background: #333;
+      border: 2px solid #888;
+      border-radius: 0 10% 57% 43% / 81% 20% 80% 0%;
+      font-size: 11px;
+      text-transform: lowercase;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      border-radius: 0 10% 17% 43% / 11% 20% 80% 0%;
+    }
+
+    input[type="range"] {
+      min-width: 0;
+      width: 100%;
+      margin: 0;
+      accent-color: #550000;
+    }
+
+    #eq {
+      height: 21px;
+      padding-right: 2px;
+    }
+
+    #imageContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    #blood {
+      width: 100%;
+      max-width: 640px;
+      opacity: .82;
+      transition:
+        opacity 1s ease,
+        filter 1s ease,
+        transform 1s ease;
+    }
+
+    #youtube {
+      margin-top: 8px;
+      transition: transform .18s ease, filter .18s ease;
+    }
+
+    #youtube:hover {
+      transform: scale(1.1) rotate(-1deg);
+    }
+
+    #youtube img {
+      width: 80px;
+      max-width: 18vw;
+    }
+
+    #descriptionBox {
+      width: 256px;
+      min-height: 485px;
+      margin-top: 64px;
+      padding: 10px;
+      color: #eee;
+      background: linear-gradient(rgba(51,51,51,.68), rgba(17,17,17,.98));
+      outline: 1px solid #444;
+      line-height: 26px;
+      font-size: 17px;
+      transition:
+        color 1s ease,
+        background 1s ease,
+        outline-color 1s ease,
+        filter .5s ease,
+        transform .5s ease;
+    }
+
+    #descriptionBox h2 {
+      line-height: 1.12;
+      margin-top: 8px;
+      transition: color .8s ease, text-shadow .8s ease;
+    }
+
+    #descriptionText {
+      white-space: normal;
+    }
+
+    .flying-image {
+      width: 11px;
+      filter: saturate(0) brightness(.5);
+      opacity: .5;
+      position: fixed;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    #message {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      z-index: 90;
+      width: min(90vw, 800px);
+      text-align: center;
+      font: italic 15px Georgia, serif;
+      color: rgba(240,240,240,.74);
+      opacity: 0;
+      pointer-events: none;
+      text-shadow: 0 2px 7px #000;
+    }
+
+    #message.show {
+      animation: message 3.4s ease both;
+    }
+
+    @keyframes message {
+      0% { opacity: 0; filter: blur(4px); }
+      18% { opacity: .8; filter: blur(0); }
+      70% { opacity: .65; }
+      100% { opacity: 0; }
+    }
+
+    #flash {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      pointer-events: none;
+      opacity: 0;
+      background: #fff;
+    }
+
+    #flash.go {
+      animation: flash 100ms steps(2,end);
+    }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      40% { opacity: .18; }
+      100% { opacity: 0; }
+    }
+
+    /* Video-progress horror stages */
+
+    body.stage1 #video-overlay {
+      opacity: .12;
+    }
+
+    body.stage1 #video-wrap {
+      box-shadow: 0 0 32px rgba(85,0,0,.32);
+    }
+
+    body.stage2 {
+      filter: saturate(.8);
+    }
+
+    body.stage2 #descriptionBox {
+      background: linear-gradient(rgba(45,20,20,.72), rgba(8,8,8,.99));
+      outline-color: #4b1a1a;
+    }
+
+    body.stage2 #blood {
+      opacity: .95;
+      filter: contrast(1.07);
+    }
+
+    body.stage3 {
+      filter: saturate(.55) contrast(1.03);
+    }
+
+    body.stage3 #video-overlay {
+      opacity: .3;
+    }
+
+    body.stage3 #video-wrap {
+      box-shadow: 0 0 40px rgba(110,0,0,.42);
+      transform: scale(1.004);
+    }
+
+    body.stage3 #descriptionBox h2 {
+      color: #d3baba;
+      text-shadow: 0 0 8px rgba(150,0,0,.45);
+    }
+
+    body.stage3 #blood {
+      opacity: 1;
+      transform: scale(1.006);
+      filter: contrast(1.12) brightness(.88);
+    }
+
+    body.stage4 {
+      filter: saturate(.35) contrast(1.09) brightness(.9);
+    }
+
+    body.stage4 #container {
+      transform: translateY(1px);
+    }
+
+    body.stage4 #video-overlay {
+      opacity: .5;
+    }
+
+    body.stage4 #video-wrap {
+      box-shadow:
+        0 0 50px rgba(115,0,0,.5),
+        inset 0 0 35px rgba(0,0,0,.35);
+    }
+
+    body.stage4 #descriptionBox {
+      color: #d4c5c5;
+      outline-color: #5f1414;
+    }
+
+    .glitch {
+      animation: glitch 130ms steps(2,end);
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      25% { transform: translate(-2px,1px); filter: contrast(1.5); }
+      50% { transform: translate(2px,-1px); filter: brightness(.65); }
+      75% { transform: translate(-1px,0); }
+      100% { transform: translate(0); }
+    }
+
+    @media (max-width: 930px) {
+      #container {
+        grid-template-columns: 1fr;
+        width: min(640px, calc(100vw - 18px));
+        gap: 0;
+      }
+
+      #video-container,
+      #descriptionBox {
+        margin-top: 28px;
+      }
+
+      #descriptionBox {
+        width: 100%;
+        min-height: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="flash"></div>
+  <div id="message"></div>
+  <div id="header-container"></div>
+
+  <main id="container">
+    <section id="video-container">
+      <div id="video-wrap">
+        <video id="video" preload="metadata">
+          <source src="media/food.mp4" type="video/mp4">
+        </video>
+        <div id="video-overlay"></div>
+      </div>
+
+      <div id="controls">
+        <button id="playPauseBtn" type="button">go</button>
+        <input type="range" id="progressBar" min="0" max="100" step="0.1" value="0" aria-label="Video progress">
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+        <img src="images/ecualizador.gif" id="eq" alt="">
+      </div>
+
+      <div id="imageContainer">
+        <img id="blood" src="images/blood.gif" alt="">
+        <a href="https://youtube.com/video/erbApikL26g" target="_blank" id="youtube" rel="noopener">
+          <img src="images/yt_food.png" alt="YouTube">
+        </a>
+      </div>
+    </section>
+
+    <aside id="descriptionBox">
+      <h2 id="episodeTitle">SML Movie: The Food That Looks Good!</h2>
+      <p id="descriptionText">
+        The Food That Looks Good is your typical modern SML slop full of everything we've come to dread but expect.
+        It was voted worst SML Movie of the year last year for a reason.
+        <br><br>
+        <b>Fact about production:</b><br>
+        This was the last video starring a living Jeffy.
+        <br><br>
+        You can watch this shitfest by looking to your left, where it is.
+      </p>
+    </aside>
+  </main>
+
+  <script>
+    const body = document.body;
+    const video = document.getElementById('video');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const progressBar = document.getElementById('progressBar');
+    const videoWrap = document.getElementById('video-wrap');
+    const descriptionText = document.getElementById('descriptionText');
+    const episodeTitle = document.getElementById('episodeTitle');
+    const message = document.getElementById('message');
+    const flash = document.getElementById('flash');
+
+    const originalDescription = descriptionText.innerHTML;
+
+    // Keep the recovered breathing effect, but start it after user interaction
+    // so modern browsers do not block it.
+    const breath = new Audio('https://nez.fyi/sml-assets/breatheheavylonger.ogg');
+    breath.loop = true;
+    breath.volume = .22;
+
+    let audioStarted = false;
+
+    function ensureAmbience() {
+      if (audioStarted) return;
+      audioStarted = true;
+      breath.play().catch(() => {});
+    }
+
+    function togglePlayPause() {
+      ensureAmbience();
+
+      if (video.paused) {
+        video.play();
+        playPauseBtn.textContent = 'og';
+      } else {
+        video.pause();
+        playPauseBtn.textContent = 'go';
+      }
+    }
+
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    video.addEventListener('click', togglePlayPause);
+
+    volumeSlider.addEventListener('input', () => {
+      video.volume = Number(volumeSlider.value);
+    });
+
+    progressBar.addEventListener('input', () => {
+      if (!Number.isFinite(video.duration)) return;
+      video.currentTime = (Number(progressBar.value) / 100) * video.duration;
+      ensureAmbience();
+    });
+
+    video.addEventListener('timeupdate', () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+
+      const progress = video.currentTime / video.duration;
+      progressBar.value = progress * 100;
+
+      updateHorror(progress);
+    });
+
+    video.addEventListener('ended', () => {
+      playPauseBtn.textContent = 'go';
+      document.title = 'The Food That Looked Good';
+      showMessage('you watched the whole thing');
+      localStorage.setItem('foodFinished', 'true');
+    });
+
+    function clearStages() {
+      body.classList.remove('stage1', 'stage2', 'stage3', 'stage4');
+    }
+
+    let lastStage = 0;
+
+    function updateHorror(progress) {
+      let stage = 0;
+
+      if (progress >= .20) stage = 1;
+      if (progress >= .45) stage = 2;
+      if (progress >= .68) stage = 3;
+      if (progress >= .86) stage = 4;
+
+      clearStages();
+      if (stage >= 1) body.classList.add('stage1');
+      if (stage >= 2) body.classList.add('stage2');
+      if (stage >= 3) body.classList.add('stage3');
+      if (stage >= 4) body.classList.add('stage4');
+
+      if (stage !== lastStage) {
+        onStageChange(stage);
+        lastStage = stage;
+      }
+
+      if (stage < 2) {
+        episodeTitle.textContent = 'SML Movie: The Food That Looks Good!';
+        descriptionText.innerHTML = originalDescription;
+        document.title = 'The Food That Looks Good! - smlwiki.com';
+      }
+
+      if (stage >= 2) {
+        episodeTitle.textContent = 'SML Movie: The Food That Looks Good!';
+        document.title = 'The Food That Looks Good?';
+      }
+
+      if (stage >= 3) {
+        descriptionText.innerHTML =
+          'The Food That Looks Good is your typical modern SML slop full of everything we\'ve come to dread but expect.' +
+          '<br><br><b>Fact about production:</b><br>' +
+          'This was the last video starring a living Jeffy.' +
+          '<br><br><span style="opacity:.68">you should have stopped earlier.</span>';
+        document.title = 'THE FOOD';
+      }
+
+      if (stage >= 4) {
+        episodeTitle.textContent = 'The Food That Looked Good';
+        descriptionText.innerHTML =
+          'The Food That Looks Good is your typical modern SML slop.' +
+          '<br><br><b>Fact about production:</b><br>' +
+          'This was the last video starring a living Jeffy.' +
+          '<br><br><span style="opacity:.6">it already happened.</span>';
+        document.title = 'DON\'T EAT IT';
+      }
+    }
+
+    function onStageChange(stage) {
+      if (stage === 2) {
+        showMessage('something changed');
+      }
+
+      if (stage === 3) {
+        glitchOnce();
+      }
+
+      if (stage === 4) {
+        glitchOnce();
+        flashOnce();
+        showMessage('the joke is over');
+      }
+    }
+
+    function showMessage(text) {
+      message.textContent = text;
+      message.classList.remove('show');
+      void message.offsetWidth;
+      message.classList.add('show');
+    }
+
+    function glitchOnce() {
+      videoWrap.classList.remove('glitch');
+      void videoWrap.offsetWidth;
+      videoWrap.classList.add('glitch');
+      setTimeout(() => videoWrap.classList.remove('glitch'), 170);
+    }
+
+    function flashOnce() {
+      flash.classList.remove('go');
+      void flash.offsetWidth;
+      flash.classList.add('go');
+    }
+
+    // If the viewer finished the episode before, the page remembers.
+    if (localStorage.getItem('foodFinished') === 'true') {
+      setTimeout(() => {
+        showMessage('you came back');
+      }, 1800);
+    }
+
+    // Flying insects.
+    const numImages = 14;
+    const flyingImages = [];
+
+    function createFlyingImage() {
+      const image = document.createElement('img');
+      image.src = 'insect001.gif';
+      image.classList.add('flying-image');
+      document.body.appendChild(image);
+
+      const initialX = Math.random() * window.innerWidth;
+      const initialY = Math.random() * window.innerHeight;
+
+      image.style.left = `${initialX}px`;
+      image.style.top = `${initialY}px`;
+
+      flyingImages.push({
+        element: image,
+        speedX: (Math.random() - .5) * 2.6,
+        speedY: (Math.random() - .5) * 2.2
+      });
+    }
+
+    for (let i = 0; i < numImages; i++) {
+      createFlyingImage();
+    }
+
+    function updateFlyingImages() {
+      for (const fly of flyingImages) {
+        let x = parseFloat(fly.element.style.left);
+        let y = parseFloat(fly.element.style.top);
+
+        x += fly.speedX;
+        y += fly.speedY;
+
+        if (x < 0 || x + fly.element.width > window.innerWidth) {
+          fly.speedX *= -1;
+          x = Math.max(0, Math.min(x, window.innerWidth - fly.element.width));
+        }
+
+        if (y < 0 || y + fly.element.height > window.innerHeight) {
+          fly.speedY *= -1;
+          y = Math.max(0, Math.min(y, window.innerHeight - fly.element.height));
+        }
+
+        fly.element.style.left = `${x}px`;
+        fly.element.style.top = `${y}px`;
+      }
+
+      requestAnimationFrame(updateFlyingImages);
+    }
+
+    updateFlyingImages();
+
+    // Optional remote header.
+    fetch('https://mystufflist.github.io/global/header.html')
+      .then(response => {
+        if (!response.ok) throw new Error('header unavailable');
+        return response.text();
+      })
+      .then(html => {
+        document.getElementById('header-container').innerHTML = html;
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>
