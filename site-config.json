@@ -12,5 +12,5 @@
     "one of them is missing"
   ],
   "glitchEnabled": true,
-  "glitchChance": 0.18
+  "glitchChance": 10000000
 }
