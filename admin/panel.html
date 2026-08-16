@@ -1,0 +1,4 @@
+<!doctype html><html><head><meta charset="utf-8"><title>SMLWiki Admin</title>
+<script>if(sessionStorage.getItem("smlwiki_admin_authenticated")!=="yes")location.replace("./");</script>
+<style>body{margin:0;background:#080909;color:#d8e6e2;font-family:Consolas,monospace;padding:30px}h1{color:#66ff98}.card{background:#111414;border:1px solid #2b3836;padding:20px;border-radius:8px;max-width:700px}button{padding:9px 12px;background:#251414;color:#ffb0b0;border:1px solid #603b3b;cursor:pointer}</style></head>
+<body><h1>SMLWIKI // ADMIN</h1><div class="card"><h2>Access granted</h2><p>This is the protected admin destination. Replace this panel.html with your existing admin panel HTML while keeping the authentication guard at the top.</p><button onclick="sessionStorage.removeItem('smlwiki_admin_authenticated');location.href='./'">LOG OUT</button></div></body></html>
