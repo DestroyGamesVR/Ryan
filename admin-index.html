@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DG Control // Ryan Site Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0A0D14; --panel:#11151F; --panel-2:#161B27; --border:#232939; --border-soft:#1B2130;
+    --text:#E9ECF2; --text-dim:#8B93A6; --text-faint:#5C6377;
+    --accent:#7B6CFB; --accent-soft:#7B6CFB22;
+    --ok:#22E3A6; --ok-soft:#22E3A61a; --warn:#FFB648; --warn-soft:#FFB6481a;
+    --danger:#FF5C7A; --danger-soft:#FF5C7A1a; --radius:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:radial-gradient(1200px 600px at 15% -10%, #171d2c 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #14182a 0%, transparent 55%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  #login-screen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .login-card{width:100%; max-width:420px; background:linear-gradient(180deg, var(--panel-2), var(--panel)); border:1px solid var(--border); border-radius:14px; padding:36px 32px 30px;}
+  .brand-badge{width:46px; height:46px; border-radius:10px; background:linear-gradient(140deg, var(--accent), #4F3FE0); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; color:#fff; margin-bottom:18px;}
+  .login-card h1{font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600;}
+  .login-card p.sub{color:var(--text-dim); font-size:13px; margin-top:6px; margin-bottom:22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:8px;}
+  .field input{width:100%; background:#0D1119; border:1px solid var(--border); color:var(--text); padding:12px 14px; border-radius:8px; font-family:'IBM Plex Mono',monospace; font-size:13px; outline:none;}
+  .field input:focus{border-color:var(--accent);}
+  .field .hint{font-size:11px; color:var(--text-faint); margin-top:6px; line-height:1.5;}
+  .login-btn{margin-top:6px; width:100%; padding:12px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; font-size:14px; cursor:pointer;}
+  .login-error{margin-top:14px; font-size:12.5px; color:var(--danger); display:none;}
+  .login-foot{margin-top:22px; text-align:center; font-size:11px; color:var(--text-faint);}
+
+  #app{display:none; min-height:100vh;}
+  .shell{display:grid; grid-template-columns:230px 1fr; min-height:100vh;}
+  .sidebar{background:var(--panel); border-right:1px solid var(--border); padding:20px 14px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
+  .side-brand{display:flex; align-items:center; gap:10px; padding:6px 8px 20px;}
+  .side-brand .brand-badge{width:34px; height:34px; font-size:13px; margin:0;}
+  .side-brand b{font-family:'Space Grotesk',sans-serif; font-size:14.5px; display:block;}
+  .side-brand span{font-size:10.5px; color:var(--text-faint);}
+  .nav-item{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; color:var(--text-dim); font-size:13.5px; font-weight:500; cursor:pointer; margin-bottom:2px;}
+  .nav-item:hover{background:var(--panel-2); color:var(--text);}
+  .nav-item.active{background:var(--accent-soft); color:#C9C1FF;}
+  .conn-box{margin-top:auto; background:var(--panel-2); border:1px solid var(--border-soft); border-radius:10px; padding:12px; font-size:12px;}
+  .conn-box .dot-row{display:flex; align-items:center; gap:7px; font-weight:600;}
+  .dot{width:7px; height:7px; border-radius:50%;}
+  .dot.ok{background:var(--ok);} .dot.bad{background:var(--danger);}
+  .conn-box .sub{color:var(--text-faint); margin-top:5px; word-break:break-all;}
+  .logout-btn{margin-top:10px; width:100%; background:none; border:1px solid var(--border); color:var(--text-dim); padding:8px; border-radius:8px; font-size:12px; cursor:pointer;}
+  .logout-btn:hover{border-color:var(--danger); color:var(--danger);}
+
+  .main{padding:26px 32px 60px; min-width:0;}
+  .topbar{margin-bottom:22px;}
+  .topbar h2{font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600;}
+  .topbar .crumb{font-size:12px; color:var(--text-faint); margin-top:4px;}
+  .btn{padding:9px 15px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--panel-2); color:var(--text);}
+  .btn:hover{filter:brightness(1.15);}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn.danger{background:transparent; border-color:#4a2230; color:var(--danger);}
+  .btn.danger:hover{background:var(--danger-soft);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .panel{display:none;} .panel.active{display:block;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:20px;}
+  .card-head{margin-bottom:14px;}
+  .card-head h3{font-family:'Space Grotesk',sans-serif; font-size:15.5px; font-weight:600;}
+  .card-head .desc{font-size:12px; color:var(--text-faint); margin-top:3px;}
+  .form-field{margin-bottom:12px;}
+  .form-field label{font-size:11.5px; color:var(--text-dim); font-weight:500; display:block; margin-bottom:6px;}
+  .form-field input, .form-field textarea, .form-field select{width:100%; background:#0D1119; border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:7px; font-size:13px; font-family:'IBM Plex Mono',monospace; outline:none;}
+  .form-field textarea{min-height:280px; resize:vertical; line-height:1.5;}
+  .row{display:flex; gap:10px; flex-wrap:wrap;}
+  .status-msg{margin-top:12px; font-size:12.5px; padding:9px 12px; border-radius:7px; display:none;}
+  .status-msg.ok{display:block; background:var(--ok-soft); color:var(--ok);}
+  .status-msg.err{display:block; background:var(--danger-soft); color:var(--danger);}
+  .status-msg.info{display:block; background:var(--warn-soft); color:var(--warn);}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border-soft);}
+  .toggle-row:last-child{border-bottom:none;}
+  .toggle-row .t-label{font-size:13.5px; font-weight:500;}
+  .toggle-row .t-desc{font-size:12px; color:var(--text-faint); margin-top:3px; max-width:460px;}
+  .switch{position:relative; width:42px; height:24px; flex:none;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; cursor:pointer; inset:0; background:#2A3040; border-radius:24px; transition:.15s;}
+  .slider:before{content:""; position:absolute; height:18px; width:18px; left:3px; top:3px; background:#c7cad4; border-radius:50%; transition:.15s;}
+  input:checked + .slider{background:var(--accent);}
+  input:checked + .slider:before{transform:translateX(18px); background:#fff;}
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  th{text-align:left; font-size:10.5px; text-transform:uppercase; color:var(--text-faint); padding:0 8px 8px; border-bottom:1px solid var(--border-soft);}
+  td{padding:10px 8px; border-bottom:1px solid var(--border-soft);}
+  tr:last-child td{border-bottom:none;}
+  .bars{display:flex; align-items:flex-end; gap:8px; height:110px; padding-top:10px;}
+  .bar{flex:1; background:linear-gradient(180deg, var(--accent), #4F3FE0); border-radius:5px 5px 0 0; position:relative; min-height:2px;}
+  .bar span{position:absolute; bottom:-20px; left:0; right:0; text-align:center; font-size:9.5px; color:var(--text-faint);}
+  .empty{text-align:center; padding:30px 10px; color:var(--text-faint); font-size:12.5px;}
+  footer.made-by{margin-top:10px; padding-top:18px; border-top:1px solid var(--border-soft); font-size:11.5px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  footer.made-by b{color:var(--text-dim);}
+  .quick-path{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .quick-path button{font-size:11px; padding:5px 9px; border-radius:6px; border:1px solid var(--border); background:var(--panel-2); color:var(--text-dim); cursor:pointer;}
+  .quick-path button:hover{color:var(--text); border-color:var(--accent);}
+  @media (max-width:900px){ .shell{grid-template-columns:1fr;} .sidebar{position:relative; height:auto; flex-direction:row; overflow-x:auto;} .conn-box{display:none;} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="brand-badge">DG</div>
+    <h1>DG Control Panel</h1>
+    <p class="sub">Admin for ryan.destroygames.com — staff only.</p>
+    <div class="field">
+      <label>Passcode</label>
+      <input type="password" id="pw" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>GitHub token</label>
+      <input type="password" id="ghtoken" placeholder="ghp_..." autocomplete="off" />
+      <div class="hint">Needs "repo" scope on DestroyGamesVR/Ryan. Kept only in this browser tab's memory — never sent anywhere but api.github.com, never saved to disk. You'll re-enter it next time you open the panel.</div>
+    </div>
+    <button class="login-btn" onclick="tryLogin()">Unlock panel</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-foot">SITE MADE BY DESTROYGAMESVR</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="shell">
+    <div class="sidebar">
+      <div class="side-brand">
+        <div class="brand-badge">DG</div>
+        <div><b>DG Control</b><span>ryan.destroygames.com</span></div>
+      </div>
+      <div class="nav-item active" data-panel="overview">◧ Overview</div>
+      <div class="nav-item" data-panel="editor">✎ File Editor</div>
+      <div class="nav-item" data-panel="images">◫ Images</div>
+      <div class="nav-item" data-panel="config">◉ Site Controls</div>
+      <div class="nav-item" data-panel="activity">◔ Activity</div>
+
+      <div class="conn-box">
+        <div class="dot-row" id="conn-status"><span class="dot bad"></span> Checking...</div>
+        <div class="sub" id="conn-repo">DestroyGamesVR/Ryan</div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Lock panel</button>
+    </div>
+
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <section class="panel active" id="panel-overview">
+        <div class="topbar"><h2>Overview</h2><div class="crumb">Live status of ryan.destroygames.com</div></div>
+        <div class="card">
+          <div class="card-head"><h3>Traffic — last 14 days</h3><div class="desc">From GitHub's repo traffic API (requires push access)</div></div>
+          <div id="traffic-summary" class="mono" style="font-size:13px; color:var(--text-dim); margin-bottom:6px;">Loading…</div>
+          <div class="bars" id="traffic-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Top pages</h3></div>
+          <table><thead><tr><th>Path</th><th>Views</th><th>Unique visitors</th></tr></thead><tbody id="top-paths"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table>
+        </div>
+      </section>
+
+      <!-- FILE EDITOR -->
+      <section class="panel" id="panel-editor">
+        <div class="topbar"><h2>File Editor</h2><div class="crumb">Load, edit, and commit any file in the repo</div></div>
+        <div class="card">
+          <div class="quick-path">
+            <button onclick="quickLoad('index.html')">index.html</button>
+            <button onclick="quickLoad('404.html')">404.html</button>
+            <button onclick="quickLoad('site-config.json')">site-config.json</button>
+            <button onclick="quickLoad('news/index.html')">news/</button>
+            <button onclick="quickLoad('achievements/index.html')">achievements/</button>
+            <button onclick="quickLoad('store/index.html')">store/</button>
+            <button onclick="quickLoad('characters/index.html')">characters/</button>
+          </div>
+          <div class="form-field">
+            <label>File path (from repo root)</label>
+            <input id="edit-path" placeholder="e.g. news/index.html" />
+          </div>
+          <div class="row">
+            <button class="btn" onclick="loadFile()">Load file</button>
+          </div>
+          <div class="form-field" style="margin-top:14px;">
+            <label>Content</label>
+            <textarea id="edit-content" placeholder="Load a file to edit it..."></textarea>
+          </div>
+          <div class="form-field">
+            <label>Commit message</label>
+            <input id="edit-commit-msg" placeholder="Update news/index.html" />
+          </div>
+          <div class="row">
+            <button class="btn primary" onclick="saveFile()">Commit changes</button>
+            <button class="btn danger" onclick="deleteFile()">Delete file</button>
+          </div>
+          <div class="status-msg" id="editor-status"></div>
+        </div>
+      </section>
+
+      <!-- IMAGES -->
+      <section class="panel" id="panel-images">
+        <div class="topbar"><h2>Images</h2><div class="crumb">Upload a file to replace or add an image anywhere in the repo</div></div>
+        <div class="card">
+          <div class="form-field">
+            <label>Target path (from repo root)</label>
+            <input id="img-path" placeholder="e.g. images/8d6ukgXfD78J.png" />
+          </div>
+          <div class="form-field">
+            <label>New image file</label>
+            <input type="file" id="img-file" accept="image/*" />
+          </div>
+          <div class="form-field">
+            <label>Commit message</label>
+            <input id="img-commit-msg" placeholder="Replace logo image" />
+          </div>
+          <button class="btn primary" onclick="uploadImage()">Upload &amp; commit</button>
+          <div class="status-msg" id="images-status"></div>
+        </div>
+      </section>
+
+      <!-- SITE CONTROLS -->
+      <section class="panel" id="panel-config">
+        <div class="topbar"><h2>Site Controls</h2><div class="crumb">Live toggles — writes to site-config.json, index.html reads it in real time</div></div>
+        <div class="card">
+          <div class="toggle-row">
+            <div><div class="t-label">Maintenance mode</div><div class="t-desc">Takes the site down for every visitor and shows a message instead.</div></div>
+            <label class="switch"><input type="checkbox" id="cfg-maintenance"><span class="slider"></span></label>
+          </div>
+          <div class="form-field" style="margin-top:10px;">
+            <label>Maintenance message</label>
+            <input id="cfg-maintenance-msg" />
+          </div>
+          <div class="toggle-row">
+            <div><div class="t-label">Warning banner</div><div class="t-desc">The "fan-made restoration" notice at the top of the page.</div></div>
+            <label class="switch"><input type="checkbox" id="cfg-warning"><span class="slider"></span></label>
+          </div>
+          <div class="form-field">
+            <label>Warning banner text</label>
+            <input id="cfg-warning-text" />
+          </div>
+          <div class="toggle-row">
+            <div><div class="t-label">Horror splash screen</div><div class="t-desc">Random full-screen message on load.</div></div>
+            <label class="switch"><input type="checkbox" id="cfg-splash"><span class="slider"></span></label>
+          </div>
+          <div class="form-field">
+            <label>Splash chance (0–1)</label>
+            <input id="cfg-splash-chance" />
+          </div>
+          <div class="form-field">
+            <label>Splash messages (one per line)</label>
+            <textarea id="cfg-splash-msgs" style="min-height:100px;"></textarea>
+          </div>
+          <div class="toggle-row">
+            <div><div class="t-label">Glitch effect</div><div class="t-desc">Occasional one-off visual corruption on the frame.</div></div>
+            <label class="switch"><input type="checkbox" id="cfg-glitch"><span class="slider"></span></label>
+          </div>
+          <div class="form-field">
+            <label>Glitch chance (0–1)</label>
+            <input id="cfg-glitch-chance" />
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" onclick="loadConfig()">Reload from repo</button>
+            <button class="btn primary" onclick="saveConfig()">Save &amp; publish</button>
+          </div>
+          <div class="status-msg" id="config-status"></div>
+        </div>
+      </section>
+
+      <!-- ACTIVITY -->
+      <section class="panel" id="panel-activity">
+        <div class="topbar"><h2>Activity</h2><div class="crumb">Recent commits to the repo</div></div>
+        <div class="card">
+          <table><thead><tr><th>Message</th><th>Author</th><th>When</th></tr></thead><tbody id="commits-table"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody></table>
+        </div>
+      </section>
+
+      <footer class="made-by">
+        <span>Site made by <b>DestroyGamesVR</b></span>
+        <span>DG CONTROL PANEL — INTERNAL USE ONLY</span>
+      </footer>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PASSWORD = "youwontguessthispassword12312";
+  const OWNER = "DestroyGamesVR";
+  const REPO = "Ryan";
+  const BRANCH = "main";
+  const API = "https://api.github.com";
+
+  let GH_TOKEN = null;
+  let fileSha = null; // sha of currently loaded file, needed to commit an update
+
+  function gh(path, opts = {}) {
+    return fetch(API + path, {
+      ...opts,
+      headers: {
+        'Authorization': 'Bearer ' + GH_TOKEN,
+        'Accept': 'application/vnd.github+json',
+        ...(opts.headers || {})
+      }
+    });
+  }
+
+  function tryLogin() {
+    const pw = document.getElementById('pw').value;
+    const token = document.getElementById('ghtoken').value.trim();
+    const err = document.getElementById('login-error');
+    if (pw !== PASSWORD) {
+      err.textContent = '⚠ Incorrect passcode.';
+      err.style.display = 'block';
+      return;
+    }
+    if (!token) {
+      err.textContent = '⚠ GitHub token required to control the live site.';
+      err.style.display = 'block';
+      return;
+    }
+    GH_TOKEN = token;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    checkConnection();
+    loadTraffic();
+    loadCommits();
+    loadConfig();
+  }
+
+  function logout() {
+    GH_TOKEN = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('ghtoken').value = '';
+  }
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+    });
+  });
+
+  async function checkConnection() {
+    const statusEl = document.getElementById('conn-status');
+    try {
+      const res = await gh(`/repos/${OWNER}/${REPO}`);
+      if (!res.ok) throw new Error();
+      statusEl.innerHTML = '<span class="dot ok"></span> Connected';
+    } catch {
+      statusEl.innerHTML = '<span class="dot bad"></span> Token invalid or no access';
+    }
+  }
+
+  function b64DecodeUnicode(str) {
+    return decodeURIComponent(atob(str).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  }
+  function b64EncodeUnicode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+      (m, p1) => String.fromCharCode('0x' + p1)));
+  }
+
+  function quickLoad(path) {
+    document.getElementById('edit-path').value = path;
+    loadFile();
+  }
+
+  async function loadFile() {
+    const path = document.getElementById('edit-path').value.trim();
+    const statusEl = document.getElementById('editor-status');
+    if (!path) return;
+    statusEl.className = 'status-msg info'; statusEl.textContent = 'Loading ' + path + '…';
+    try {
+      const res = await gh(`/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`);
+      if (!res.ok) throw new Error('File not found or no access (' + res.status + ')');
+      const data = await res.json();
+      fileSha = data.sha;
+      document.getElementById('edit-content').value = b64DecodeUnicode(data.content.replace(/\n/g, ''));
+      document.getElementById('edit-commit-msg').value = 'Update ' + path;
+      statusEl.className = 'status-msg ok'; statusEl.textContent = 'Loaded ' + path;
+    } catch (e) {
+      fileSha = null;
+      statusEl.className = 'status-msg err'; statusEl.textContent = e.message;
+    }
+  }
+
+  async function saveFile() {
+    const path = document.getElementById('edit-path').value.trim();
+    const content = document.getElementById('edit-content').value;
+    const msg = document.getElementById('edit-commit-msg').value.trim() || ('Update ' + path);
+    const statusEl = document.getElementById('editor-status');
+    if (!path) return;
+    statusEl.className = 'status-msg info'; statusEl.textContent = 'Committing…';
+    try {
+      const body = { message: msg, content: b64EncodeUnicode(content), branch: BRANCH };
+      if (fileSha) body.sha = fileSha; // omit for new files
+      const res = await gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Commit failed');
+      fileSha = data.content.sha;
+      statusEl.className = 'status-msg ok'; statusEl.textContent = 'Committed. GitHub Pages will redeploy shortly.';
+      loadCommits();
+    } catch (e) {
+      statusEl.className = 'status-msg err'; statusEl.textContent = e.message;
+    }
+  }
+
+  async function deleteFile() {
+    const path = document.getElementById('edit-path').value.trim();
+    const statusEl = document.getElementById('editor-status');
+    if (!path || !fileSha) { statusEl.className = 'status-msg err'; statusEl.textContent = 'Load the file first.'; return; }
+    if (!confirm('Delete ' + path + ' from the live site? This cannot be undone from here.')) return;
+    try {
+      const res = await gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Delete ' + path, sha: fileSha, branch: BRANCH })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Delete failed');
+      document.getElementById('edit-content').value = '';
+      fileSha = null;
+      statusEl.className = 'status-msg ok'; statusEl.textContent = 'Deleted ' + path;
+      loadCommits();
+    } catch (e) {
+      statusEl.className = 'status-msg err'; statusEl.textContent = e.message;
+    }
+  }
+
+  async function uploadImage() {
+    const path = document.getElementById('img-path').value.trim();
+    const fileInput = document.getElementById('img-file');
+    const msg = document.getElementById('img-commit-msg').value.trim() || ('Update ' + path);
+    const statusEl = document.getElementById('images-status');
+    if (!path || !fileInput.files[0]) { statusEl.className = 'status-msg err'; statusEl.textContent = 'Pick a path and a file.'; return; }
+    statusEl.className = 'status-msg info'; statusEl.textContent = 'Uploading…';
+    try {
+      const file = fileInput.files[0];
+      const buffer = await file.arrayBuffer();
+      const base64 = btoa(new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), ''));
+      let sha = null;
+      const existing = await gh(`/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`);
+      if (existing.ok) sha = (await existing.json()).sha;
+      const body = { message: msg, content: base64, branch: BRANCH };
+      if (sha) body.sha = sha;
+      const res = await gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+      statusEl.className = 'status-msg ok'; statusEl.textContent = 'Uploaded. GitHub Pages will redeploy shortly.';
+      loadCommits();
+    } catch (e) {
+      statusEl.className = 'status-msg err'; statusEl.textContent = e.message;
+    }
+  }
+
+  let configSha = null;
+  async function loadConfig() {
+    const statusEl = document.getElementById('config-status');
+    try {
+      const res = await gh(`/repos/${OWNER}/${REPO}/contents/site-config.json?ref=${BRANCH}`);
+      if (!res.ok) throw new Error('site-config.json not found yet — save once to create it.');
+      const data = await res.json();
+      configSha = data.sha;
+      const cfg = JSON.parse(b64DecodeUnicode(data.content.replace(/\n/g, '')));
+      document.getElementById('cfg-maintenance').checked = !!cfg.maintenanceMode;
+      document.getElementById('cfg-maintenance-msg').value = cfg.maintenanceMessage || '';
+      document.getElementById('cfg-warning').checked = cfg.warningBannerEnabled !== false;
+      document.getElementById('cfg-warning-text').value = cfg.warningBannerText || '';
+      document.getElementById('cfg-splash').checked = cfg.splashEnabled !== false;
+      document.getElementById('cfg-splash-chance').value = cfg.splashChance ?? 0.28;
+      document.getElementById('cfg-splash-msgs').value = (cfg.splashMessages || []).join('\n');
+      document.getElementById('cfg-glitch').checked = cfg.glitchEnabled !== false;
+      document.getElementById('cfg-glitch-chance').value = cfg.glitchChance ?? 0.18;
+      statusEl.className = 'status-msg ok'; statusEl.textContent = 'Loaded live config.';
+    } catch (e) {
+      configSha = null;
+      statusEl.className = 'status-msg info'; statusEl.textContent = e.message;
+    }
+  }
+
+  async function saveConfig() {
+    const statusEl = document.getElementById('config-status');
+    const cfg = {
+      maintenanceMode: document.getElementById('cfg-maintenance').checked,
+      maintenanceMessage: document.getElementById('cfg-maintenance-msg').value,
+      warningBannerEnabled: document.getElementById('cfg-warning').checked,
+      warningBannerText: document.getElementById('cfg-warning-text').value,
+      splashEnabled: document.getElementById('cfg-splash').checked,
+      splashChance: parseFloat(document.getElementById('cfg-splash-chance').value) || 0,
+      splashMessages: document.getElementById('cfg-splash-msgs').value.split('\n').map(s => s.trim()).filter(Boolean),
+      glitchEnabled: document.getElementById('cfg-glitch').checked,
+      glitchChance: parseFloat(document.getElementById('cfg-glitch-chance').value) || 0
+    };
+    statusEl.className = 'status-msg info'; statusEl.textContent = 'Publishing…';
+    try {
+      const body = { message: 'Update site-config.json via admin panel', content: b64EncodeUnicode(JSON.stringify(cfg, null, 2)), branch: BRANCH };
+      if (configSha) body.sha = configSha;
+      const res = await gh(`/repos/${OWNER}/${REPO}/contents/site-config.json`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Save failed');
+      configSha = data.content.sha;
+      statusEl.className = 'status-msg ok'; statusEl.textContent = 'Published. Live on the site within a minute or two.';
+      loadCommits();
+    } catch (e) {
+      statusEl.className = 'status-msg err'; statusEl.textContent = e.message;
+    }
+  }
+
+  async function loadTraffic() {
+    const summaryEl = document.getElementById('traffic-summary');
+    const barsEl = document.getElementById('traffic-bars');
+    const pathsEl = document.getElementById('top-paths');
+    try {
+      const [viewsRes, pathsRes] = await Promise.all([
+        gh(`/repos/${OWNER}/${REPO}/traffic/views`),
+        gh(`/repos/${OWNER}/${REPO}/traffic/popular/paths`)
+      ]);
+      if (!viewsRes.ok) throw new Error('Traffic API needs push access on the repo.');
+      const views = await viewsRes.json();
+      const total = views.count ?? 0;
+      const uniques = views.uniques ?? 0;
+      summaryEl.textContent = `${total} views · ${uniques} unique visitors (last 14 days)`;
+      const days = views.views || [];
+      const max = Math.max(1, ...days.map(d => d.count));
+      barsEl.innerHTML = days.map(d => {
+        const label = new Date(d.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return `<div class="bar" style="height:${(d.count / max * 100) || 2}%"><span>${label}</span></div>`;
+      }).join('') || '<div class="empty">No traffic recorded yet.</div>';
+
+      if (pathsRes.ok) {
+        const paths = await pathsRes.json();
+        pathsEl.innerHTML = paths.length ? paths.map(p =>
+          `<tr><td class="mono">${p.path}</td><td>${p.count}</td><td>${p.uniques}</td></tr>`
+        ).join('') : '<tr><td colspan="3" class="empty">No page views recorded yet.</td></tr>';
+      }
+    } catch (e) {
+      summaryEl.textContent = e.message;
+      barsEl.innerHTML = '';
+      pathsEl.innerHTML = '<tr><td colspan="3" class="empty">Unavailable</td></tr>';
+    }
+  }
+
+  async function loadCommits() {
+    const tbody = document.getElementById('commits-table');
+    try {
+      const res = await gh(`/repos/${OWNER}/${REPO}/commits?per_page=10`);
+      if (!res.ok) throw new Error('Could not load commits.');
+      const commits = await res.json();
+      tbody.innerHTML = commits.map(c => {
+        const when = new Date(c.commit.author.date);
+        return `<tr>
+          <td>${c.commit.message.split('\n')[0]}</td>
+          <td>${c.commit.author.name}</td>
+          <td class="mono">${when.toLocaleDateString()} ${when.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="3" class="empty">No commits found.</td></tr>';
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty">${e.message}</td></tr>`;
+    }
+  }
+
+  document.getElementById('ghtoken').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+</script>
+</body>
+</html>

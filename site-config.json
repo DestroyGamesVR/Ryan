@@ -1,0 +1,16 @@
+{
+  "maintenanceMode": false,
+  "maintenanceMessage": "Down for a bit — back soon.",
+  "warningBannerEnabled": true,
+  "warningBannerText": "Note: fan-made restoration / horror recreation",
+  "splashEnabled": true,
+  "splashChance": 0.28,
+  "splashMessages": [
+    "7 ciphers, 7 letters, 1 meaning",
+    "6 out of 7…",
+    "you have been here before",
+    "one of them is missing"
+  ],
+  "glitchEnabled": true,
+  "glitchChance": 0.18
+}

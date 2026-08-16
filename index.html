@@ -508,6 +508,42 @@
     <div id="area-title" aria-live="polite"></div>
   </main>
 
+  <div id="maintenance-screen" style="display:none; position:fixed; inset:0; z-index:2000; background:#000; color:#eee; align-items:center; justify-content:center; text-align:center; font-family:Georgia,serif; padding:24px;">
+    <div><h1 style="font-size:22px; letter-spacing:.04em; margin-bottom:10px;">BACK SOON</h1><p id="maintenance-message" style="opacity:.7; font-size:14px;"></p></div>
+  </div>
+
+  <script>
+    // Site config — controlled from /admin. Falls back to defaults if unreachable.
+    const SITE_CONFIG_DEFAULTS = {
+      maintenanceMode: false,
+      maintenanceMessage: "Down for a bit — back soon.",
+      warningBannerEnabled: true,
+      warningBannerText: "Note: fan-made restoration / horror recreation",
+      splashEnabled: true,
+      splashChance: 0.28,
+      splashMessages: [
+        '7 ciphers, 7 letters, 1 meaning',
+        '6 out of 7…',
+        'you have been here before',
+        'one of them is missing'
+      ],
+      glitchEnabled: true,
+      glitchChance: 0.18
+    };
+
+    async function loadSiteConfig() {
+      try {
+        const res = await fetch('/site-config.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('no config');
+        return { ...SITE_CONFIG_DEFAULTS, ...(await res.json()) };
+      } catch {
+        return SITE_CONFIG_DEFAULTS;
+      }
+    }
+
+    let siteConfig = SITE_CONFIG_DEFAULTS;
+  </script>
+
   <script>
     const $ = (sel) => document.querySelector(sel);
     const areaTitle = $('#area-title');
@@ -626,33 +662,52 @@
       localStorage.setItem('warningClosed', 'true');
     });
 
-    // Horror splash has a low chance to appear.
-    const splashMessages = [
-      '7 ciphers, 7 letters, 1 meaning',
-      '6 out of 7…',
-      'you have been here before',
-      'one of them is missing'
-    ];
-
-    if (Math.random() < .28) {
-      const splash = $('#splash');
-      splash.textContent = splashMessages[Math.floor(Math.random() * splashMessages.length)];
-      splash.classList.add('active');
-    }
-
-    // Subtle one-off corruption. Rare enough that it feels discovered.
-    if (Math.random() < .18) {
-      setTimeout(() => {
-        frame.classList.add('glitch-once');
-        setTimeout(() => frame.classList.remove('glitch-once'), 220);
-      }, 3500 + Math.random() * 7000);
-    }
-
     // Optional remote header; page still works if it fails.
     fetch('https://ryan.destroygames.com/global/header.html')
       .then(r => r.ok ? r.text() : Promise.reject())
       .then(html => $('#header-container').innerHTML = html)
       .catch(() => {});
+
+    // Apply live config from /admin, then run config-dependent behavior.
+    loadSiteConfig().then((cfg) => {
+      siteConfig = cfg;
+
+      // Maintenance mode: hide the site, show a simple message.
+      if (cfg.maintenanceMode) {
+        $('#maintenance-message').textContent = cfg.maintenanceMessage || '';
+        $('#maintenance-screen').style.display = 'flex';
+        $('#page').style.display = 'none';
+        return; // skip the rest — no point wiring up a hidden page
+      }
+
+      // Warning banner text + on/off, respecting the existing dismiss flag.
+      const warningEl = $('#sense-warning');
+      if (!cfg.warningBannerEnabled) {
+        warningEl.style.display = 'none';
+      } else if (localStorage.getItem('warningClosed') !== 'true') {
+        const strongEl = warningEl.querySelector('strong');
+        warningEl.childNodes.forEach(n => {
+          if (n.nodeType === Node.TEXT_NODE) n.textContent = '';
+        });
+        warningEl.insertBefore(document.createTextNode(' ' + (cfg.warningBannerText || '')), warningEl.querySelector('#close-warning'));
+      }
+
+      // Horror splash — chance and message pool from config.
+      if (cfg.splashEnabled && Math.random() < (cfg.splashChance ?? 0.28)) {
+        const pool = cfg.splashMessages?.length ? cfg.splashMessages : SITE_CONFIG_DEFAULTS.splashMessages;
+        const splash = $('#splash');
+        splash.textContent = pool[Math.floor(Math.random() * pool.length)];
+        splash.classList.add('active');
+      }
+
+      // Subtle one-off corruption — chance from config.
+      if (cfg.glitchEnabled && Math.random() < (cfg.glitchChance ?? 0.18)) {
+        setTimeout(() => {
+          frame.classList.add('glitch-once');
+          setTimeout(() => frame.classList.remove('glitch-once'), 220);
+        }, 3500 + Math.random() * 7000);
+      }
+    });
   </script>
 </body>
 </html>
