@@ -1,5 +1,5 @@
 {
-  "maintenanceMode": false,
+  "maintenanceMode": true,
   "maintenanceMessage": "Down for a bit — back soon.",
   "warningBannerEnabled": true,
   "warningBannerText": "Note: fan-made restoration / horror recreation",
