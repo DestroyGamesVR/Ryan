@@ -11,6 +11,6 @@
     "you have been here before",
     "one of them is missing"
   ],
-  "glitchEnabled": true,
+  "glitchEnabled": false,
   "glitchChance": 10000000
 }
