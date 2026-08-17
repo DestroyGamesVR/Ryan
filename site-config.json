@@ -9,8 +9,8 @@
     "7 ciphers, 7 letters, 1 meaning",
     "6 out of 7…",
     "you have been here before",
-    "one of them is missing"
+    "CamMan is coming after you..."
   ],
-  "glitchEnabled": true,
-  "glitchChance": 0.18
+  "glitchEnabled": false,
+  "glitchChance": 10000000
 }
