@@ -38,7 +38,7 @@ body:after{
 
 /* homemade title screen */
 #start{
-  background:url('https://ryan.destroygames.com/game/find-brooklyn-guy/game/960x0_1.jpg') center/cover no-repeat;
+  background:url('../find-brooklyn-guy/game/960x0_1.jpg') center/cover no-repeat;
   overflow:hidden
 }
 #start:after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.15);pointer-events:none}
@@ -203,14 +203,14 @@ body:after{
         <div class="bigwords">BROOKLYN GUY'S<br>NIGHT SHIFT!</div>
         <div class="littlewords">By whoever keeps<br>giving him jobs</div>
         <div id="speech">easy money!</div>
-        <img id="startGuy" src="https://ryan.destroygames.com/game/find-brooklyn-guy/game/base_2.png" alt="">
+        <img id="startGuy" src="../find-brooklyn-guy/game/base_2.png" alt="">
         <button id="play">PLAY!</button>
         <span id="tiny">click to clock in</span>
       </div>
 
       <div id="shift" class="screen hidden">
         <div id="view"></div>
-        <img id="sceneGuy" src="https://ryan.destroygames.com/game/find-brooklyn-guy/game/brooklyn.png" alt="">
+        <img id="sceneGuy" src="../find-brooklyn-guy/game/brooklyn.png" alt="">
         <div id="leftZone"></div><div id="rightZone"></div>
         <div id="location">OFFICE</div>
         <div id="hudText"><div id="clock">12 AM</div><div id="power">POWER: 100%</div></div>
@@ -218,7 +218,7 @@ body:after{
 
         <div id="camOverlay">
           <div id="camPic"></div>
-          <img id="camGuy" src="https://ryan.destroygames.com/game/find-brooklyn-guy/game/brooklyn.png" alt="">
+          <img id="camGuy" src="../find-brooklyn-guy/game/brooklyn.png" alt="">
           <div id="camName">CAM 1</div>
           <div id="map">
             <button class="cam c0 active" data-cam="0">CAM 1</button>
@@ -244,7 +244,7 @@ body:after{
         <div id="whiteFlash"></div>
 
         <div id="jumpscare">
-          <img src="https://ryan.destroygames.com/game/find-brooklyn-guy/game/base_2.png" alt="">
+          <img src="../find-brooklyn-guy/game/base_2.png" alt="">
         </div>
 
         <div id="ending">
@@ -258,23 +258,42 @@ body:after{
   <div id="status"></div>
 </main>
 
-<audio id="amb" src="https://ryan.destroygames.com/game/find-brooklyn-guy/game/guy2.ogg" loop preload="auto"></audio>
-<audio id="winSound" src="https://ryan.destroygames.com/game/find-brooklyn-guy/game/awshucks.mp3" preload="auto"></audio>
+<audio id="amb" src="../find-brooklyn-guy/game/guy2.ogg" loop preload="auto"></audio>
+<audio id="winSound" src="../find-brooklyn-guy/game/awshucks.mp3" preload="auto"></audio>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+// Resolve every game asset from the actual sibling Find Brooklyn Guy folder.
+const ASSET_BASE = '../find-brooklyn-guy/game/';
+function asset(path){ return ASSET_BASE + path.replace(/^\/+/, ''); }
+
+// Replace any generated relative paths consistently in case the page moves.
+document.querySelectorAll('img[src^="../find-brooklyn-guy/game/"], audio[src^="../find-brooklyn-guy/game/"]').forEach(el => {
+  const raw = el.getAttribute('src').split('../find-brooklyn-guy/game/').pop();
+  el.setAttribute('src', asset(raw));
+});
 const shell=$('#shell'),game=$('#game'),start=$('#start'),shift=$('#shift'),status=$('#status');
 function fit(){const w=shell.clientWidth;game.style.transform=`scale(${w/640})`;shell.style.height=(423*w/640)+'px'}
 addEventListener('resize',fit);fit();
 
-const bg1='https://ryan.destroygames.com/game/find-brooklyn-guy/game/levels/1bg.png';
-const fg1='https://ryan.destroygames.com/game/find-brooklyn-guy/game/levels/1fg.png';
-const bg3='https://ryan.destroygames.com/game/find-brooklyn-guy/game/levels/3.jpg';
+const bg1=asset('levels/1bg.png');
+const fg1=asset('levels/1fg.png');
+const bg3=asset('levels/3.jpg');
 const CAMS=[
  {n:'CAM 1 - FRONT ROOM',b:bg1},{n:'CAM 2 - FRONT HALL',b:fg1},
  {n:'CAM 3 - BACK ROOM',b:bg3},{n:'CAM 4 - STORAGE',b:bg1},
  {n:'CAM 5 - LEFT HALL',b:bg3},{n:'CAM 6 - RIGHT HALL',b:fg1}
 ];
+
+
+// Useful console warnings instead of silent broken images.
+document.querySelectorAll('#game img').forEach(img => {
+  img.addEventListener('error', () => {
+    console.warn('Night Shift asset failed:', img.getAttribute('src'));
+    img.style.visibility = 'hidden';
+  });
+});
 
 let running=false,t=0,power=100,last=0,camOpen=false,cam=0;
 let leftDoor=false,rightDoor=false,leftLight=false,rightLight=false;
@@ -435,9 +454,42 @@ $('#retry').onclick=begin;
 setTimeout(()=>{if(!running&&Math.random()<.7)outerNote('another job?')},6500);
 setTimeout(()=>{if(!running&&Math.random()<.35){$('#speech').textContent='dont clock in';tinyGlitch()}},10000);
 
-fetch('https://ryan.destroygames.com/global/header.html')
- .then(r=>r.ok?r.text():Promise.reject())
- .then(h=>$('#header-container').innerHTML=h).catch(()=>{});
+fetch('../../global/header.html')
+ .then(r => r.ok ? r.text() : Promise.reject(new Error('header unavailable')))
+ .then(h => {
+   const holder = document.createElement('div');
+   holder.innerHTML = h;
+
+   // header.html was fetched from /global/, but injected relative URLs would
+   // otherwise resolve from /game/brooklyn-guys-night-shift/.
+   holder.querySelectorAll('[src]').forEach(el => {
+     const v = el.getAttribute('src');
+     if (v && !/^(?:https?:|data:|blob:|\/)/i.test(v)) {
+       el.setAttribute('src', '/global/' + v.replace(/^\.\//, ''));
+     }
+   });
+
+   holder.querySelectorAll('[href]').forEach(el => {
+     const v = el.getAttribute('href');
+     if (v && !/^(?:https?:|mailto:|tel:|#|\/)/i.test(v)) {
+       el.setAttribute('href', '/global/' + v.replace(/^\.\//, ''));
+     }
+   });
+
+   holder.querySelectorAll('[style]').forEach(el => {
+     const s = el.getAttribute('style');
+     if (!s) return;
+     el.setAttribute('style',
+       s.replace(/url\((['"]?)(?!https?:|data:|blob:|\/)([^)'"]+)\1\)/gi,
+         (_, q, url) => `url(${q}/global/${url.replace(/^\.\//, '')}${q})`)
+     );
+   });
+
+   $('#header-container').innerHTML = holder.innerHTML;
+ })
+ .catch(() => {
+   // Game remains playable even if the shared header is unavailable.
+ });
 </script>
 </body>
 </html>
