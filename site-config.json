@@ -2,7 +2,7 @@
   "maintenanceMode": false,
   "maintenanceMessage": "Down forever — back never.",
   "warningBannerEnabled": true,
-  "warningBannerText": "Note: This is a note",
+  "warningBannerText": "This is a note",
   "splashEnabled": true,
   "splashChance": 0.7,
   "splashMessages": [
