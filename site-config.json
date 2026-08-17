@@ -1,15 +1,16 @@
 {
   "maintenanceMode": false,
-  "maintenanceMessage": "Down for a bit — back soon.",
+  "maintenanceMessage": "Down forever — back never.",
   "warningBannerEnabled": true,
-  "warningBannerText": "Note: fan-made restoration / horror recreation",
+  "warningBannerText": "Note: This is a note",
   "splashEnabled": true,
-  "splashChance": 0.28,
+  "splashChance": 0.7,
   "splashMessages": [
     "7 ciphers, 7 letters, 1 meaning",
     "6 out of 7…",
     "you have been here before",
-    "CamMan is coming after you..."
+    "ElliNet13 is coming after you...",
+    "aaaaaaaaaaaaaaaaaaaufghjuilytjulibyrtjuioltybnjliuntdrfoyhntyrfuihu8iretdgvh8iutrybdieuhrtbeviuiuehrytvgbihertgvbihytrebihbtrehiuhiyuertgbihyuetr4"
   ],
   "glitchEnabled": false,
   "glitchChance": 10000000
